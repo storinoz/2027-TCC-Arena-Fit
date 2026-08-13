@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cronograma do Projeto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F2E9;
+    --paper-line:#E1D9C4;
+    --panel:#FFFFFF;
+    --ink:#26241E;
+    --ink-soft:#6B6656;
+    --ink-faint:#A39D89;
+    --rule:#DED5BE;
+    --navy:#2C4A66;
+    --navy-soft:#DCE6EC;
+    --amber:#D98E3F;
+    --amber-soft:#F6E4C9;
+    --sage:#54744F;
+    --sage-soft:#E1EADC;
+    --clay:#AE5138;
+    --clay-soft:#F1DCD3;
+    --slate:#5C6B78;
+    --slate-soft:#E2E7EA;
+    --plum:#6C5170;
+    --plum-soft:#EAE1EA;
+    --shadow: 0 1px 2px rgba(38,36,30,0.06), 0 6px 20px -8px rgba(38,36,30,0.15);
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0/100% 28px,
+      var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    line-height:1.5;
+    padding-bottom:80px;
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:0 20px;}
+  header.top{
+    padding:38px 0 22px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:28px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);}
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(28px, 4vw, 40px);
+    margin:6px 0 8px;
+    letter-spacing:-0.01em;
+  }
+  h1[contenteditable]{outline:none; cursor:text; border-bottom:1px dashed transparent;}
+  h1[contenteditable]:hover{border-bottom:1px dashed var(--ink-faint);}
+  h1[contenteditable]:focus{border-bottom:1px dashed var(--navy);}
+  .range-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    display:flex; gap:18px; flex-wrap:wrap; align-items:center;
+  }
+  .range-line b{color:var(--ink); font-weight:600;}
+  .toolbar{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
+  button, .btn{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    border-radius:7px;
+    border:1.5px solid var(--ink);
+    background:var(--panel);
+    color:var(--ink);
+    padding:8px 14px;
+    cursor:pointer;
+    transition:transform .08s ease, background .15s ease;
+  }
+  button:hover{background:var(--ink); color:#fff;}
+  button:active{transform:scale(.97);}
+  button.primary{background:var(--navy); color:#fff; border-color:var(--navy);}
+  button.primary:hover{background:#1e3549;}
+  button.ghost{border-color:var(--rule); color:var(--ink-soft); font-size:12.5px; padding:6px 10px;}
+  button.ghost:hover{background:var(--ink-soft); color:#fff;}
+  button.danger{border-color:var(--clay); color:var(--clay); background:transparent;}
+  button.danger:hover{background:var(--clay); color:#fff;}
+  input[type=file]{display:none;}
+
+  section{margin-bottom:36px;}
+  .section-head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
+  .section-head h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:19px;
+    font-weight:600;
+    margin:0;
+    display:flex; align-items:center; gap:9px;
+  }
+  .section-head h2 .idx{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-faint);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    padding:1px 6px;
+  }
+  .section-head p{margin:0; font-size:13px; color:var(--ink-soft);}
+
+  .stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+  .stat{
+    background:var(--panel); border:1px solid var(--rule); border-radius:var(--radius);
+    padding:14px 16px; box-shadow:var(--shadow);
+  }
+  .stat .num{font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700;}
+  .stat .lbl{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .stat.amber .num{color:var(--amber);}
+  .stat.sage .num{color:var(--sage);}
+  .stat.navy .num{color:var(--navy);}
+
+  .panel{
+    background:var(--panel); border:1px solid var(--rule); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:20px;
+  }
+
+  /* Gantt */
+  .gantt-scroll{overflow-x:auto;}
+  .gantt{min-width:760px;}
+  .gantt-ruler{display:flex; border-bottom:1px solid var(--rule); margin-left:190px; position:relative; height:26px;}
+  .gantt-month{
+    flex:1; font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft);
+    border-left:1px dashed var(--rule); padding-left:6px; text-transform:uppercase; letter-spacing:.05em;
+  }
+  .gantt-row{display:flex; align-items:center; min-height:38px; border-bottom:1px solid #EFE9D9; position:relative;}
+  .gantt-row:last-child{border-bottom:none;}
+  .gantt-label{
+    width:190px; flex-shrink:0; font-size:13px; padding-right:10px; cursor:pointer;
+    display:flex; align-items:center; gap:7px;
+  }
+  .gantt-label .swatch{width:9px; height:9px; border-radius:2px; flex-shrink:0;}
+  .gantt-label span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .gantt-track{flex:1; position:relative; height:22px; background:repeating-linear-gradient(90deg, #EFE9D9 0, #EFE9D9 1px, transparent 1px, transparent calc(100%/10));}
+  .gantt-bar{
+    position:absolute; top:3px; height:16px; border-radius:5px; cursor:pointer;
+    box-shadow:0 1px 2px rgba(0,0,0,.15); transition:filter .1s;
+  }
+  .gantt-bar:hover{filter:brightness(1.08);}
+  .gantt-today{
+    position:absolute; top:0; bottom:0; width:0; border-left:2px dashed var(--amber); z-index:5;
+  }
+  .gantt-today .flag{
+    position:absolute; top:-22px; left:-24px; background:var(--amber); color:#fff;
+    font-family:'IBM Plex Mono', monospace; font-size:10px; padding:2px 6px; border-radius:4px; white-space:nowrap;
+  }
+  .gantt-milestones-row{display:flex; align-items:center; min-height:34px; margin-left:190px; position:relative;}
+  .gantt-milestones-row .lane{flex:1; position:relative; height:20px;}
+  .diamond{
+    position:absolute; width:12px; height:12px; transform:translate(-50%,-50%) rotate(45deg);
+    top:50%; border:2px solid var(--ink); background:var(--panel); cursor:pointer;
+  }
+  .diamond.done{background:var(--sage); border-color:var(--sage);}
+  .diamond:hover{filter:brightness(1.1);}
+
+  .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; font-size:12px; color:var(--ink-soft);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend .sw{width:9px;height:9px;border-radius:2px;}
+
+  /* categories */
+  .cat-list{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .cat-row{
+    display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--rule);
+    border-radius:8px; background:var(--panel); font-size:13.5px;
+  }
+  .cat-row .swatch{width:14px; height:14px; border-radius:4px; flex-shrink:0;}
+  .cat-row .name{font-weight:500; flex:1;}
+  .cat-row .usage{font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-faint); white-space:nowrap;}
+  .field input[type=color]{padding:3px; height:40px; cursor:pointer;}
+
+  /* item list */
+  .item-list{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .item-row{
+    display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--rule);
+    border-radius:8px; background:var(--panel); font-size:13.5px;
+  }
+  .item-row .swatch{width:10px; height:10px; border-radius:3px; flex-shrink:0;}
+  .item-row .name{font-weight:500; flex:1; min-width:120px;}
+  .item-row .dates{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); white-space:nowrap;}
+  .item-row .cat{
+    font-size:11px; font-family:'IBM Plex Mono', monospace; padding:2px 8px; border-radius:20px;
+    background:var(--slate-soft); color:var(--slate); white-space:nowrap;
+  }
+  .item-row .row-actions{display:flex; gap:6px;}
+  .item-row .row-actions button{padding:4px 9px; font-size:12px;}
+
+  /* milestone list */
+  .milestone-row{
+    display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--rule);
+    border-radius:8px; background:var(--panel); font-size:13.5px;
+  }
+  .milestone-row + .milestone-row{margin-top:8px;}
+  .check{
+    width:20px; height:20px; border-radius:5px; border:2px solid var(--ink); flex-shrink:0; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff;
+  }
+  .check.done{background:var(--sage); border-color:var(--sage);}
+  .milestone-row .name{flex:1; font-weight:500;}
+  .milestone-row.done .name{color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--ink-faint);}
+  .milestone-row .date{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);}
+
+  /* weeks */
+  .week{border:1px solid var(--rule); border-radius:8px; margin-bottom:8px; overflow:hidden; background:var(--panel);}
+  .week-head{
+    display:flex; justify-content:space-between; align-items:center; padding:11px 14px; cursor:pointer;
+    font-size:13.5px; font-weight:500;
+  }
+  .week-head:hover{background:#FAF7EF;}
+  .week-head .range{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); font-weight:400;}
+  .week-head .chev{transition:transform .15s; color:var(--ink-faint);}
+  .week.open .chev{transform:rotate(90deg);}
+  .week-body{max-height:0; overflow:hidden; transition:max-height .2s ease;}
+  .week.open .week-body{max-height:400px;}
+  .week-body-inner{padding:0 14px 14px; font-size:13px; color:var(--ink-soft);}
+  .week-body-inner ul{margin:0; padding-left:18px;}
+  .week-body-inner li{margin-bottom:4px;}
+  .week-body-inner .empty{font-style:italic; color:var(--ink-faint);}
+  .week-current{border-color:var(--amber); box-shadow:0 0 0 1px var(--amber) inset;}
+  .week-current .week-head{background:var(--amber-soft);}
+
+  /* modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(38,36,30,.45); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:16px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--panel); border-radius:12px; padding:24px; width:100%; max-width:420px;
+    box-shadow:0 20px 60px -12px rgba(0,0,0,.35);
+  }
+  .modal h3{margin:0 0 16px; font-family:'Space Grotesk',sans-serif; font-size:18px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:5px; font-family:'IBM Plex Mono',monospace;}
+  .field input, .field select{
+    width:100%; padding:9px 10px; border:1.5px solid var(--rule); border-radius:6px;
+    font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; background:#FCFAF4;
+  }
+  .field input:focus, .field select:focus{outline:none; border-color:var(--navy);}
+  .field-row{display:flex; gap:10px;}
+  .field-row .field{flex:1;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:18px;}
+
+  .sync-status{
+    display:inline-flex; align-items:center; gap:7px; font-family:'IBM Plex Mono', monospace; font-size:12.5px;
+  }
+  .sync-status .pip{width:7px; height:7px; border-radius:50%; background:var(--ink-faint); flex-shrink:0;}
+  .sync-status.connected .pip{background:var(--sage);}
+  .sync-status.readonly .pip{background:var(--amber);}
+  .sync-note{font-size:12px; color:var(--ink-faint); margin-top:10px; line-height:1.6;}
+  .sync-toggle{font-size:12.5px; color:var(--navy); cursor:pointer; text-decoration:underline; text-underline-offset:2px; background:none; border:none; padding:0;}
+
+  footer.note{
+    margin-top:40px; padding-top:18px; border-top:1px solid var(--rule);
+    font-size:12px; color:var(--ink-faint); font-family:'IBM Plex Mono', monospace;
+  }
+  @media (max-width:640px){
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .gantt-label{width:120px; font-size:11.5px;}
+    .gantt-ruler, .gantt-milestones-row{margin-left:120px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow"><span class="dot"></span>CRONOGRAMA DO PROJETO — EDITÁVEL</div>
+    <h1 id="projTitle" contenteditable="true" spellcheck="false"></h1>
+    <div class="range-line">
+      <span>Início <b id="rangeStart"></b></span>
+      <span>·</span>
+      <span>Encerramento <b id="rangeEnd"></b></span>
+      <span id="contingencyLine"></span>
+    </div>
+    <div class="toolbar">
+      <button class="primary" id="btnAddItem">+ Adicionar fase/tarefa</button>
+      <button id="btnAddMilestone">+ Adicionar marco</button>
+      <button class="ghost" id="btnManageCategories">Gerenciar categorias</button>
+      <button class="ghost" id="btnExport">Exportar dados (.json)</button>
+      <button class="ghost" id="btnImportTrigger">Importar dados</button>
+      <button class="ghost" id="btnReset">Restaurar exemplo</button>
+      <input type="file" id="btnImport" accept="application/json">
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>Sincronização com GitHub</h2>
+      <span class="sync-status" id="syncStatus"><span class="pip"></span><span id="syncStatusText">Não configurado — dados salvos apenas neste navegador</span></span>
+    </div>
+    <div class="panel">
+      <button class="sync-toggle" id="syncToggle">mostrar configuração</button>
+      <div id="syncConfigForm" style="display:none; margin-top:14px;">
+        <div class="field-row">
+          <div class="field"><label>Usuário ou organização</label><input type="text" id="ghOwner" placeholder="ex: gustaeagle"></div>
+          <div class="field"><label>Repositório</label><input type="text" id="ghRepo" placeholder="ex: TCC_Calculadora_Acessivel"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Branch</label><input type="text" id="ghBranch" value="main"></div>
+          <div class="field"><label>Arquivo de dados</label><input type="text" id="ghPath" value="data.json"></div>
+        </div>
+        <div class="field">
+          <label>Token de acesso pessoal (só para quem vai editar e salvar)</label>
+          <input type="password" id="ghToken" placeholder="github_pat_xxxxxxxxxxxx">
+        </div>
+        <div class="toolbar">
+          <button class="primary" id="btnGhConnect">Salvar configuração</button>
+          <button class="ghost" id="btnGhLoad">Carregar do GitHub</button>
+          <button class="ghost" id="btnGhSave">Salvar no GitHub agora</button>
+          <button class="ghost" id="btnGhForget">Esquecer token neste navegador</button>
+        </div>
+        <p class="sync-note">
+          <b>Leitura</b> (ver o cronograma) funciona sem token, para qualquer pessoa, se o repositório for público —
+          os dados vêm direto de <code>raw.githubusercontent.com</code>.<br>
+          <b>Escrita</b> (salvar alterações) exige um token pessoal do GitHub com permissão de conteúdo neste
+          repositório. Use um <i>fine-grained token</i> restrito só a este repositório. O token fica salvo apenas
+          no armazenamento local deste navegador — nunca é enviado a nenhum lugar além da própria API do GitHub.
+          Qualquer pessoa com esse token pode editar o repositório, então trate-o como uma senha e não o compartilhe
+          publicamente.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stat-row" id="statRow"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2><span class="idx">01</span> Diagrama de Gantt</h2>
+      <p>Clique numa barra ou marco para editar. A linha âmbar é a data de hoje.</p>
+    </div>
+    <div class="panel">
+      <div class="gantt-scroll">
+        <div class="gantt" id="ganttChart"></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2><span class="idx">02</span> Fases e tarefas</h2>
+      <p id="itemCount"></p>
+    </div>
+    <div class="item-list" id="itemList"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2><span class="idx">03</span> Marcos (datas únicas)</h2>
+      <p id="milestoneCount"></p>
+    </div>
+    <div id="milestoneList"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2><span class="idx">04</span> Cronograma semanal</h2>
+      <p>Clique numa semana para expandir.</p>
+    </div>
+    <div id="weekList"></div>
+  </section>
+
+  <footer class="note">
+    Os dados ficam salvos no armazenamento local deste navegador (localStorage). Para levar para outro
+    computador, ou fazer backup, use "Exportar dados" e depois "Importar dados" no outro lugar.
+  </footer>
+</div>
+
+<!-- Modal: item (fase/tarefa) -->
+<div class="overlay" id="itemOverlay">
+  <div class="modal">
+    <h3 id="itemModalTitle">Adicionar fase/tarefa</h3>
+    <input type="hidden" id="itemId">
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="itemName" placeholder="Ex: Revisão bibliográfica">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Início</label>
+        <input type="date" id="itemStart">
+      </div>
+      <div class="field">
+        <label>Fim</label>
+        <input type="date" id="itemEnd">
+      </div>
+    </div>
+    <div class="field">
+      <label style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Categoria</span>
+        <button type="button" class="sync-toggle" id="btnManageCategoriesFromItem" style="font-size:11.5px;">gerenciar categorias</button>
+      </label>
+      <select id="itemCategory"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="danger" id="itemDelete" style="display:none;">Excluir</button>
+      <button class="ghost" id="itemCancel">Cancelar</button>
+      <button class="primary" id="itemSave">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: milestone -->
+<div class="overlay" id="msOverlay">
+  <div class="modal">
+    <h3 id="msModalTitle">Adicionar marco</h3>
+    <input type="hidden" id="msId">
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="msName" placeholder="Ex: Defesa do TCC">
+    </div>
+    <div class="field">
+      <label>Data</label>
+      <input type="date" id="msDate">
+    </div>
+    <div class="modal-actions">
+      <button class="danger" id="msDelete" style="display:none;">Excluir</button>
+      <button class="ghost" id="msCancel">Cancelar</button>
+      <button class="primary" id="msSave">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: manage categories -->
+<div class="overlay" id="catManagerOverlay">
+  <div class="modal" style="max-width:460px;">
+    <h3>Gerenciar categorias</h3>
+    <div class="cat-list" id="catManagerList"></div>
+
+    <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--rule);">
+      <input type="hidden" id="catId">
+      <div class="field-row">
+        <div class="field" style="flex:2;">
+          <label>Nome</label>
+          <input type="text" id="catName" placeholder="Ex: Orientação">
+        </div>
+        <div class="field" style="flex:1;">
+          <label>Cor</label>
+          <input type="color" id="catColor" value="#2C4A66">
+        </div>
+      </div>
+      <div class="modal-actions" style="justify-content:space-between;">
+        <button class="ghost" id="catFormCancelEdit" style="display:none;">Cancelar edição</button>
+        <button class="primary" id="catSave" style="margin-left:auto;">Adicionar categoria</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="ghost" id="catManagerClose">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "cronograma_projeto_v1";
+
+  var DEFAULT_CATEGORIES = [
+    {id:"Pesquisa", name:"Pesquisa", color:"#2C4A66"},
+    {id:"Desenvolvimento", name:"Desenvolvimento", color:"#AE5138"},
+    {id:"Escrita", name:"Escrita", color:"#6C5170"},
+    {id:"Revisão", name:"Revisão", color:"#54744F"},
+    {id:"Banca", name:"Banca", color:"#B5893F"}
+  ];
+
+  function seedData(){
+    return {
+      project:{
+        name:"TCC — Calculadora Acessível (modelo)",
+        start:"2026-03-01",
+        end:"2026-12-18",
+        contingency:"Validação física: fim de janeiro / início de fevereiro de 2027"
+      },
+      categories: DEFAULT_CATEGORIES.map(function(c){ return {id:c.id, name:c.name, color:c.color}; }),
+      items:[
+        {id:"i1", name:"Revisão bibliográfica", start:"2026-03-01", end:"2026-04-30", category:"Pesquisa"},
+        {id:"i2", name:"Definição de requisitos", start:"2026-04-01", end:"2026-04-20", category:"Pesquisa"},
+        {id:"i3", name:"Desenvolvimento do protótipo", start:"2026-04-21", end:"2026-07-15", category:"Desenvolvimento"},
+        {id:"i4", name:"Testes de acessibilidade", start:"2026-07-16", end:"2026-08-10", category:"Desenvolvimento"},
+        {id:"i5", name:"Escrita do TCC", start:"2026-06-01", end:"2026-11-15", category:"Escrita"},
+        {id:"i6", name:"Revisão final do texto", start:"2026-11-16", end:"2026-12-05", category:"Revisão"},
+        {id:"i7", name:"Preparação da defesa", start:"2026-12-01", end:"2026-12-17", category:"Banca"}
+      ],
+      milestones:[
+        {id:"m1", name:"Entrega do pré-projeto", date:"2026-03-15", done:true},
+        {id:"m2", name:"Reunião de orientação (COBRIC)", date:"2026-05-10", done:true},
+        {id:"m3", name:"Entrega parcial (qualificação)", date:"2026-08-07", done:false},
+        {id:"m4", name:"Entrega da versão final", date:"2026-12-10", done:false},
+        {id:"m5", name:"Defesa do TCC", date:"2026-12-18", done:false}
+      ]
+    };
+  }
+
+  var data = load();
+  ensureCategories();
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return seedData();
+  }
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  }
+  function uid(prefix){ return prefix + Math.random().toString(36).slice(2,9); }
+
+  function ensureCategories(){
+    // backward compatibility: older saved/imported data may not have a categories list yet.
+    // ids match the legacy category names so existing items keep working unchanged.
+    if(!data.categories || !data.categories.length){
+      data.categories = DEFAULT_CATEGORIES.map(function(c){ return {id:c.id, name:c.name, color:c.color}; });
+    }
+  }
+  function catById(id){
+    var c = data.categories.find(function(x){ return x.id===id; });
+    return c || {id:id, name:id || "Sem categoria", color:"#8A8477"};
+  }
+
+  // ---------- date helpers ----------
+  function parseD(s){ var p=s.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function fmt(s){ var d=parseD(s); return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(); }
+  function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+  function todayISO(){
+    var d=new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  var TODAY = todayISO();
+
+  // ---------- render: header ----------
+  function renderHeader(){
+    var t = document.getElementById("projTitle");
+    if(t.textContent !== data.project.name) t.textContent = data.project.name;
+    document.getElementById("rangeStart").textContent = fmt(data.project.start);
+    document.getElementById("rangeEnd").textContent = fmt(data.project.end);
+    document.getElementById("contingencyLine").textContent = data.project.contingency ? ("· " + data.project.contingency) : "";
+  }
+
+  // ---------- render: stats ----------
+  function renderStats(){
+    var totalM = data.milestones.length;
+    var doneM = data.milestones.filter(function(m){return m.done;}).length;
+    var pct = totalM ? Math.round(100*doneM/totalM) : 0;
+
+    var start = parseD(data.project.start), end = parseD(data.project.end), now = parseD(TODAY);
+    var totalDays = Math.max(1, daysBetween(start,end));
+    var elapsed = Math.min(Math.max(daysBetween(start,now),0), totalDays);
+    var remaining = Math.max(daysBetween(now,end), 0);
+
+    var activeToday = data.items.filter(function(it){
+      return it.start<=TODAY && TODAY<=it.end;
+    }).length;
+
+    var nextMs = data.milestones
+      .filter(function(m){return !m.done && m.date>=TODAY;})
+      .sort(function(a,b){return a.date<b.date?-1:1;})[0];
+
+    var html = "";
+    html += stat("navy", pct+"%", "Marcos concluídos");
+    html += stat("amber", remaining, "Dias até o encerramento");
+    html += stat("sage", activeToday, "Fases/tarefas em andamento hoje");
+    html += stat("", nextMs? fmt(nextMs.date): "—", nextMs? ("Próximo marco: "+nextMs.name) : "Nenhum marco pendente");
+    document.getElementById("statRow").innerHTML = html;
+  }
+  function stat(cls, num, lbl){
+    return '<div class="stat '+cls+'"><div class="num">'+num+'</div><div class="lbl">'+esc(lbl)+'</div></div>';
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---------- render: gantt ----------
+  function renderGantt(){
+    var start = parseD(data.project.start), end = parseD(data.project.end);
+    var totalDays = Math.max(1, daysBetween(start,end));
+
+    // month ruler
+    var months = [];
+    var cur = new Date(start.getFullYear(), start.getMonth(), 1);
+    while(cur <= end){
+      months.push(new Date(cur));
+      cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
+    }
+    var monthNames = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+    var rulerHtml = months.map(function(m){
+      return '<div class="gantt-month">'+monthNames[m.getMonth()]+"/"+String(m.getFullYear()).slice(2)+"</div>";
+    }).join("");
+
+    // rows
+    var rowsHtml = data.items.map(function(it){
+      var color = catById(it.category).color;
+      var s = parseD(it.start), e = parseD(it.end);
+      var left = 100*daysBetween(start,s)/totalDays;
+      var width = Math.max(1.2, 100*daysBetween(s,e)/totalDays);
+      var todayMark = "";
+      if(TODAY>=data.project.start && TODAY<=data.project.end){
+        var tOff = 100*daysBetween(start, parseD(TODAY))/totalDays;
+        todayMark = '<div class="gantt-today" style="left:'+tOff+'%"></div>';
+      }
+      return '<div class="gantt-row">'
+        + '<div class="gantt-label" data-item="'+it.id+'"><span class="swatch" style="background:'+color+'"></span><span title="'+esc(it.name)+'">'+esc(it.name)+'</span></div>'
+        + '<div class="gantt-track">'
+          + '<div class="gantt-bar" data-item="'+it.id+'" style="left:'+left+'%;width:'+width+'%;background:'+color+'" title="'+esc(it.name)+' · '+fmt(it.start)+' – '+fmt(it.end)+'"></div>'
+          + todayMark
+        + '</div>'
+      + '</div>';
+    }).join("");
+
+    // today flag row (only once, on top row track if exists)
+    var todayFlag = "";
+    if(TODAY>=data.project.start && TODAY<=data.project.end){
+      var tOff2 = 100*daysBetween(start, parseD(TODAY))/totalDays;
+      todayFlag = '<div style="position:relative;height:0;"><div class="gantt-today" style="left:calc(190px + '+tOff2+'% * (100% - 190px)/100%)"></div></div>';
+    }
+
+    // milestones row
+    var msHtml = data.milestones.map(function(m){
+      var off = 100*daysBetween(start, parseD(m.date))/totalDays;
+      off = Math.min(Math.max(off,0),100);
+      return '<div class="diamond'+(m.done?' done':'')+'" data-ms="'+m.id+'" style="left:'+off+'%" title="'+esc(m.name)+' · '+fmt(m.date)+'"></div>';
+    }).join("");
+
+    var html = '<div class="gantt-ruler">'+rulerHtml+'</div>'
+      + rowsHtml
+      + '<div class="gantt-milestones-row"><div class="lane">'+msHtml+'</div></div>';
+
+    document.getElementById("ganttChart").innerHTML = html;
+
+    // legend
+    var legendHtml = data.categories.map(function(c){
+      return '<span><span class="sw" style="background:'+c.color+'"></span>'+esc(c.name)+'</span>';
+    }).join("") + '<span><span class="sw" style="background:#D98E3F"></span>Hoje</span><span><span class="sw" style="background:#54744F"></span>Marco concluído</span>';
+    document.getElementById("legend").innerHTML = legendHtml;
+
+    // click handlers
+    document.querySelectorAll('[data-item]').forEach(function(el){
+      el.addEventListener("click", function(){ openItemModal(el.getAttribute("data-item")); });
+    });
+    document.querySelectorAll('[data-ms]').forEach(function(el){
+      el.addEventListener("click", function(){ openMsModal(el.getAttribute("data-ms")); });
+    });
+  }
+
+  // ---------- render: item list ----------
+  function renderItemList(){
+    document.getElementById("itemCount").textContent = data.items.length + " item(ns)";
+    var html = data.items.slice().sort(function(a,b){return a.start<b.start?-1:1;}).map(function(it){
+      var c = catById(it.category);
+      return '<div class="item-row">'
+        + '<span class="swatch" style="background:'+c.color+'"></span>'
+        + '<span class="name">'+esc(it.name)+'</span>'
+        + '<span class="cat">'+esc(c.name)+'</span>'
+        + '<span class="dates">'+fmt(it.start)+' – '+fmt(it.end)+'</span>'
+        + '<span class="row-actions"><button class="ghost" data-edit-item="'+it.id+'">Editar</button></span>'
+      + '</div>';
+    }).join("") || '<p style="color:var(--ink-faint);font-style:italic;">Nenhuma fase ou tarefa ainda.</p>';
+    document.getElementById("itemList").innerHTML = html;
+    document.querySelectorAll('[data-edit-item]').forEach(function(el){
+      el.addEventListener("click", function(){ openItemModal(el.getAttribute("data-edit-item")); });
+    });
+  }
+
+  // ---------- render: milestones ----------
+  function renderMilestoneList(){
+    var totalM=data.milestones.length, doneM=data.milestones.filter(function(m){return m.done;}).length;
+    document.getElementById("milestoneCount").textContent = doneM+" de "+totalM+" concluídos";
+    var html = data.milestones.slice().sort(function(a,b){return a.date<b.date?-1:1;}).map(function(m){
+      return '<div class="milestone-row'+(m.done?' done':'')+'">'
+        + '<span class="check'+(m.done?' done':'')+'" data-toggle-ms="'+m.id+'">'+(m.done?"✓":"")+'</span>'
+        + '<span class="name">'+esc(m.name)+'</span>'
+        + '<span class="date">'+fmt(m.date)+'</span>'
+        + '<button class="ghost" data-edit-ms="'+m.id+'">Editar</button>'
+      + '</div>';
+    }).join("") || '<p style="color:var(--ink-faint);font-style:italic;">Nenhum marco ainda.</p>';
+    document.getElementById("milestoneList").innerHTML = html;
+    document.querySelectorAll('[data-toggle-ms]').forEach(function(el){
+      el.addEventListener("click", function(){
+        var id = el.getAttribute("data-toggle-ms");
+        var m = data.milestones.find(function(x){return x.id===id;});
+        m.done = !m.done;
+        save(); renderAll();
+      });
+    });
+    document.querySelectorAll('[data-edit-ms]').forEach(function(el){
+      el.addEventListener("click", function(){ openMsModal(el.getAttribute("data-edit-ms")); });
+    });
+  }
+
+  // ---------- render: weeks ----------
+  function renderWeeks(){
+    var start = parseD(data.project.start), end = parseD(data.project.end);
+    // align to Sunday
+    var cur = new Date(start);
+    cur.setDate(cur.getDate() - cur.getDay());
+    var weeks = [];
+    while(cur <= end){
+      var wEnd = new Date(cur); wEnd.setDate(wEnd.getDate()+6);
+      weeks.push({start:new Date(cur), end:wEnd});
+      cur = new Date(cur); cur.setDate(cur.getDate()+7);
+    }
+    var todayD = parseD(TODAY);
+    var html = weeks.map(function(w, idx){
+      var wStartISO = isoOf(w.start), wEndISO = isoOf(w.end);
+      var isCurrent = todayD>=w.start && todayD<=w.end;
+      var items = data.items.filter(function(it){ return it.start<=wEndISO && it.end>=wStartISO; });
+      var mss = data.milestones.filter(function(m){ return m.date>=wStartISO && m.date<=wEndISO; });
+      var body = "";
+      if(items.length){
+        body += "<ul>" + items.map(function(it){ return "<li>"+esc(it.name)+" <span style='color:var(--ink-faint)'>("+fmt(it.start)+"–"+fmt(it.end)+")</span></li>"; }).join("") + "</ul>";
+      }
+      if(mss.length){
+        body += "<ul>" + mss.map(function(m){ return "<li>◆ "+esc(m.name)+" — "+fmt(m.date)+(m.done?" ✓":"")+"</li>"; }).join("") + "</ul>";
+      }
+      if(!items.length && !mss.length){
+        body = '<p class="empty">Sem itens nesta semana.</p>';
+      }
+      return '<div class="week'+(isCurrent?' week-current':'')+'" data-week="'+idx+'">'
+        + '<div class="week-head"><span>Semana '+(idx+1)+(isCurrent?' — atual':'')+'</span><span class="range">'+fmt(wStartISO)+' – '+fmt(wEndISO)+' <span class="chev">▸</span></span></div>'
+        + '<div class="week-body"><div class="week-body-inner">'+body+'</div></div>'
+      + '</div>';
+    }).join("");
+    document.getElementById("weekList").innerHTML = html;
+    document.querySelectorAll('[data-week]').forEach(function(el){
+      el.querySelector(".week-head").addEventListener("click", function(){
+        el.classList.toggle("open");
+      });
+    });
+  }
+  function isoOf(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+
+  // ---------- render: categories (used inside the manage-categories modal) ----------
+
+  function renderAll(){
+    renderHeader(); renderStats(); renderGantt(); renderItemList(); renderMilestoneList(); renderWeeks();
+  }
+
+  // ---------- item modal ----------
+  var itemOverlay = document.getElementById("itemOverlay");
+  function populateCategorySelect(){
+    var sel = document.getElementById("itemCategory");
+    var prevValue = sel.value;
+    sel.innerHTML = data.categories.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name)+'</option>'; }).join("");
+    if(prevValue) sel.value = prevValue;
+  }
+
+  function openItemModal(id){
+    var it = id ? data.items.find(function(x){return x.id===id;}) : null;
+    populateCategorySelect();
+    document.getElementById("itemModalTitle").textContent = it ? "Editar fase/tarefa" : "Adicionar fase/tarefa";
+    document.getElementById("itemId").value = it ? it.id : "";
+    document.getElementById("itemName").value = it ? it.name : "";
+    document.getElementById("itemStart").value = it ? it.start : data.project.start;
+    document.getElementById("itemEnd").value = it ? it.end : data.project.start;
+    document.getElementById("itemCategory").value = it ? it.category : (data.categories[0] ? data.categories[0].id : "");
+    document.getElementById("itemDelete").style.display = it ? "inline-block" : "none";
+    itemOverlay.classList.add("show");
+    document.getElementById("itemName").focus();
+  }
+  function closeItemModal(){ itemOverlay.classList.remove("show"); }
+  document.getElementById("btnAddItem").addEventListener("click", function(){
+    if(!data.categories.length){ alert("Crie uma categoria primeiro (seção Categorias)."); return; }
+    openItemModal(null);
+  });
+  document.getElementById("itemCancel").addEventListener("click", closeItemModal);
+  itemOverlay.addEventListener("click", function(e){ if(e.target===itemOverlay) closeItemModal(); });
+  document.getElementById("itemSave").addEventListener("click", function(){
+    var name = document.getElementById("itemName").value.trim();
+    var s = document.getElementById("itemStart").value;
+    var e = document.getElementById("itemEnd").value;
+    if(!name || !s || !e){ alert("Preencha nome, início e fim."); return; }
+    if(e < s){ alert("A data de fim deve ser igual ou depois do início."); return; }
+    var cat = document.getElementById("itemCategory").value;
+    var id = document.getElementById("itemId").value;
+    if(id){
+      var it = data.items.find(function(x){return x.id===id;});
+      it.name=name; it.start=s; it.end=e; it.category=cat;
+    } else {
+      data.items.push({id:uid("i"), name:name, start:s, end:e, category:cat});
+    }
+    save(); renderAll(); closeItemModal();
+  });
+  document.getElementById("itemDelete").addEventListener("click", function(){
+    var id = document.getElementById("itemId").value;
+    if(id && confirm("Excluir este item?")){
+      data.items = data.items.filter(function(x){return x.id!==id;});
+      save(); renderAll(); closeItemModal();
+    }
+  });
+
+  // ---------- milestone modal ----------
+  var msOverlay = document.getElementById("msOverlay");
+  function openMsModal(id){
+    var m = id ? data.milestones.find(function(x){return x.id===id;}) : null;
+    document.getElementById("msModalTitle").textContent = m ? "Editar marco" : "Adicionar marco";
+    document.getElementById("msId").value = m ? m.id : "";
+    document.getElementById("msName").value = m ? m.name : "";
+    document.getElementById("msDate").value = m ? m.date : data.project.start;
+    document.getElementById("msDelete").style.display = m ? "inline-block" : "none";
+    msOverlay.classList.add("show");
+    document.getElementById("msName").focus();
+  }
+  function closeMsModal(){ msOverlay.classList.remove("show"); }
+  document.getElementById("btnAddMilestone").addEventListener("click", function(){ openMsModal(null); });
+  document.getElementById("msCancel").addEventListener("click", closeMsModal);
+  msOverlay.addEventListener("click", function(e){ if(e.target===msOverlay) closeMsModal(); });
+  document.getElementById("msSave").addEventListener("click", function(){
+    var name = document.getElementById("msName").value.trim();
+    var d = document.getElementById("msDate").value;
+    if(!name || !d){ alert("Preencha nome e data."); return; }
+    var id = document.getElementById("msId").value;
+    if(id){
+      var m = data.milestones.find(function(x){return x.id===id;});
+      m.name=name; m.date=d;
+    } else {
+      data.milestones.push({id:uid("m"), name:name, date:d, done:false});
+    }
+    save(); renderAll(); closeMsModal();
+  });
+  document.getElementById("msDelete").addEventListener("click", function(){
+    var id = document.getElementById("msId").value;
+    if(id && confirm("Excluir este marco?")){
+      data.milestones = data.milestones.filter(function(x){return x.id!==id;});
+      save(); renderAll(); closeMsModal();
+    }
+  });
+
+  // ---------- category manager modal ----------
+  var catManagerOverlay = document.getElementById("catManagerOverlay");
+
+  function renderCatManagerList(){
+    var html = data.categories.map(function(c){
+      var count = data.items.filter(function(it){ return it.category===c.id; }).length;
+      return '<div class="cat-row">'
+        + '<span class="swatch" style="background:'+c.color+'"></span>'
+        + '<span class="name">'+esc(c.name)+'</span>'
+        + '<span class="usage">'+count+' item(ns)</span>'
+        + '<button class="ghost" data-edit-cat="'+c.id+'">Editar</button>'
+        + '<button class="ghost" data-remove-cat="'+c.id+'">Remover</button>'
+      + '</div>';
+    }).join("") || '<p style="color:var(--ink-faint);font-style:italic;">Nenhuma categoria ainda. Adicione uma abaixo.</p>';
+    document.getElementById("catManagerList").innerHTML = html;
+    document.querySelectorAll('[data-edit-cat]').forEach(function(el){
+      el.addEventListener("click", function(){ loadCatIntoForm(el.getAttribute("data-edit-cat")); });
+    });
+    document.querySelectorAll('[data-remove-cat]').forEach(function(el){
+      el.addEventListener("click", function(){ removeCategory(el.getAttribute("data-remove-cat")); });
+    });
+  }
+
+  function loadCatIntoForm(id){
+    var c = data.categories.find(function(x){return x.id===id;});
+    if(!c) return;
+    document.getElementById("catId").value = c.id;
+    document.getElementById("catName").value = c.name;
+    document.getElementById("catColor").value = c.color;
+    document.getElementById("catSave").textContent = "Salvar alterações";
+    document.getElementById("catFormCancelEdit").style.display = "inline-block";
+    document.getElementById("catName").focus();
+  }
+  function resetCatForm(){
+    document.getElementById("catId").value = "";
+    document.getElementById("catName").value = "";
+    document.getElementById("catColor").value = "#2C4A66";
+    document.getElementById("catSave").textContent = "Adicionar categoria";
+    document.getElementById("catFormCancelEdit").style.display = "none";
+  }
+  function removeCategory(id){
+    var inUse = data.items.filter(function(it){return it.category===id;}).length;
+    if(inUse){
+      alert("Esta categoria está em uso em " + inUse + " item(ns). Troque a categoria desses itens antes de removê-la.");
+      return;
+    }
+    if(confirm("Remover esta categoria?")){
+      data.categories = data.categories.filter(function(x){return x.id!==id;});
+      if(document.getElementById("catId").value===id) resetCatForm();
+      save(); renderCatManagerList();
+    }
+  }
+
+  function openCategoryManager(){
+    resetCatForm();
+    renderCatManagerList();
+    catManagerOverlay.classList.add("show");
+  }
+  function closeCategoryManager(){
+    catManagerOverlay.classList.remove("show");
+    resetCatForm();
+    renderAll();               // reflect renamed/recolored/removed categories everywhere
+    populateCategorySelect();  // refresh dropdown if the item modal is open behind it
+  }
+
+  document.getElementById("btnManageCategories").addEventListener("click", openCategoryManager);
+  document.getElementById("btnManageCategoriesFromItem").addEventListener("click", function(e){
+    e.preventDefault();
+    openCategoryManager();
+  });
+  document.getElementById("catManagerClose").addEventListener("click", closeCategoryManager);
+  catManagerOverlay.addEventListener("click", function(e){ if(e.target===catManagerOverlay) closeCategoryManager(); });
+  document.getElementById("catFormCancelEdit").addEventListener("click", resetCatForm);
+
+  document.getElementById("catSave").addEventListener("click", function(){
+    var name = document.getElementById("catName").value.trim();
+    var color = document.getElementById("catColor").value;
+    if(!name){ alert("Dê um nome para a categoria."); return; }
+    var id = document.getElementById("catId").value;
+    if(id){
+      var c = data.categories.find(function(x){return x.id===id;});
+      c.name = name; c.color = color;
+    } else {
+      data.categories.push({id:uid("cat_"), name:name, color:color});
+    }
+    save();
+    resetCatForm();
+    renderCatManagerList();
+  });
+
+  // ---------- title edit ----------
+  document.getElementById("projTitle").addEventListener("blur", function(){
+    var v = this.textContent.trim();
+    if(v){ data.project.name = v; save(); }
+    else{ this.textContent = data.project.name; }
+  });
+  document.getElementById("projTitle").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); this.blur(); }
+  });
+
+  // ---------- export / import / reset ----------
+  document.getElementById("btnExport").addEventListener("click", function(){
+    var blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "cronograma.json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById("btnImportTrigger").addEventListener("click", function(){
+    document.getElementById("btnImport").click();
+  });
+  document.getElementById("btnImport").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        var parsed = JSON.parse(evt.target.result);
+        if(!parsed.project || !parsed.items || !parsed.milestones) throw new Error("formato inválido");
+        data = parsed; ensureCategories(); save(); renderAll();
+        alert("Dados importados com sucesso.");
+      }catch(err){
+        alert("Não foi possível importar: arquivo inválido.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+  document.getElementById("btnReset").addEventListener("click", function(){
+    if(confirm("Isso substitui os dados atuais pelos dados de exemplo. Continuar?")){
+      data = seedData(); save(); renderAll();
+    }
+  });
+
+  // ---------- GitHub sync ----------
+  var GH_KEY = "cronograma_gh_config_v1";
+  function loadGhConfig(){
+    try{ var raw = localStorage.getItem(GH_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return {owner:"", repo:"", branch:"main", path:"data.json", token:""};
+  }
+  function saveGhConfig(){ try{ localStorage.setItem(GH_KEY, JSON.stringify(ghConfig)); }catch(e){} }
+  var ghConfig = loadGhConfig();
+
+  function fillGhForm(){
+    document.getElementById("ghOwner").value = ghConfig.owner || "";
+    document.getElementById("ghRepo").value = ghConfig.repo || "";
+    document.getElementById("ghBranch").value = ghConfig.branch || "main";
+    document.getElementById("ghPath").value = ghConfig.path || "data.json";
+    document.getElementById("ghToken").value = ghConfig.token || "";
+    updateSyncStatus();
+  }
+  function updateSyncStatus(text){
+    var wrap = document.getElementById("syncStatus");
+    var txt = document.getElementById("syncStatusText");
+    if(text){ txt.textContent = text; return; }
+    wrap.classList.remove("connected","readonly");
+    if(ghConfig.owner && ghConfig.repo){
+      if(ghConfig.token){
+        wrap.classList.add("connected");
+        txt.textContent = "Conectado a " + ghConfig.owner + "/" + ghConfig.repo + " (" + ghConfig.branch + ") · pode salvar";
+      } else {
+        wrap.classList.add("readonly");
+        txt.textContent = "Conectado a " + ghConfig.owner + "/" + ghConfig.repo + " · somente leitura (sem token)";
+      }
+    } else {
+      txt.textContent = "Não configurado — dados salvos apenas neste navegador";
+    }
+  }
+
+  document.getElementById("syncToggle").addEventListener("click", function(){
+    var form = document.getElementById("syncConfigForm");
+    var open = form.style.display !== "none";
+    form.style.display = open ? "none" : "block";
+    this.textContent = open ? "mostrar configuração" : "ocultar configuração";
+  });
+
+  document.getElementById("btnGhConnect").addEventListener("click", function(){
+    ghConfig.owner = document.getElementById("ghOwner").value.trim();
+    ghConfig.repo = document.getElementById("ghRepo").value.trim();
+    ghConfig.branch = document.getElementById("ghBranch").value.trim() || "main";
+    ghConfig.path = document.getElementById("ghPath").value.trim() || "data.json";
+    ghConfig.token = document.getElementById("ghToken").value.trim();
+    saveGhConfig();
+    updateSyncStatus();
+    alert("Configuração salva neste navegador.");
+  });
+  document.getElementById("btnGhForget").addEventListener("click", function(){
+    ghConfig.token = "";
+    document.getElementById("ghToken").value = "";
+    saveGhConfig();
+    updateSyncStatus();
+  });
+
+  function ghRawUrl(){
+    return "https://raw.githubusercontent.com/" + ghConfig.owner + "/" + ghConfig.repo + "/" + ghConfig.branch + "/" + ghConfig.path + "?t=" + Date.now();
+  }
+  function ghContentsUrl(){
+    return "https://api.github.com/repos/" + ghConfig.owner + "/" + ghConfig.repo + "/contents/" + ghConfig.path;
+  }
+  function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
+
+  function loadFromGithub(showAlerts){
+    if(!ghConfig.owner || !ghConfig.repo){ if(showAlerts) alert("Preencha usuário e repositório primeiro."); return; }
+    updateSyncStatus("Carregando do GitHub…");
+    fetch(ghRawUrl())
+      .then(function(r){
+        if(r.status===404){ var e=new Error("not found"); e.notFound=true; throw e; }
+        if(!r.ok) throw new Error("Erro HTTP " + r.status);
+        return r.json();
+      })
+      .then(function(json){
+        if(!json.project || !json.items || !json.milestones) throw new Error("formato inválido");
+        data = json;
+        ensureCategories();
+        save();
+        renderAll();
+        updateSyncStatus();
+        if(showAlerts) alert("Dados carregados do GitHub.");
+      })
+      .catch(function(err){
+        if(err && err.notFound){
+          updateSyncStatus("Arquivo " + ghConfig.path + " ainda não existe nesse repositório — use 'Salvar no GitHub' para criá-lo");
+        } else {
+          updateSyncStatus("Não foi possível carregar do GitHub (veja o console)");
+          console.error(err);
+        }
+      });
+  }
+
+  function saveToGithub(){
+    if(!ghConfig.owner || !ghConfig.repo){ alert("Preencha usuário e repositório primeiro."); return; }
+    if(!ghConfig.token){ alert("Cole um token de acesso pessoal com permissão de escrita para salvar no GitHub."); return; }
+    updateSyncStatus("Salvando no GitHub…");
+    var headers = { "Authorization": "token " + ghConfig.token };
+    fetch(ghContentsUrl() + "?ref=" + encodeURIComponent(ghConfig.branch), { headers: headers })
+      .then(function(r){ return r.status===404 ? null : r.json(); })
+      .then(function(existing){
+        var body = {
+          message: "Atualiza cronograma — " + new Date().toISOString(),
+          content: b64EncodeUnicode(JSON.stringify(data, null, 2)),
+          branch: ghConfig.branch
+        };
+        if(existing && existing.sha) body.sha = existing.sha;
+        return fetch(ghContentsUrl(), {
+          method: "PUT",
+          headers: { "Authorization": "token " + ghConfig.token, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+      })
+      .then(function(r){
+        if(r.status===409){ var e=new Error("conflict"); e.conflict=true; throw e; }
+        if(!r.ok) return r.json().then(function(j){ throw new Error(j.message || ("Erro HTTP " + r.status)); });
+        return r.json();
+      })
+      .then(function(){
+        updateSyncStatus("Salvo no GitHub às " + new Date().toLocaleTimeString());
+      })
+      .catch(function(err){
+        if(err && err.conflict){
+          updateSyncStatus("Conflito: alguém salvou uma versão mais nova — recarregando");
+          loadFromGithub(false);
+        } else {
+          updateSyncStatus("Falha ao salvar no GitHub");
+          console.error(err);
+          alert("Falha ao salvar no GitHub: " + (err.message || "erro desconhecido"));
+        }
+      });
+  }
+
+  document.getElementById("btnGhLoad").addEventListener("click", function(){ loadFromGithub(true); });
+  document.getElementById("btnGhSave").addEventListener("click", saveToGithub);
+
+  // ---------- init ----------
+  fillGhForm();
+  renderAll();
+  if(ghConfig.owner && ghConfig.repo){ loadFromGithub(false); }
+})();
+</script>
+</body>
+</html>
