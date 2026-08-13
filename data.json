@@ -24,12 +24,7 @@
     {
       "id": "Revisão",
       "name": "Projeto",
-      "color": "#ebe300"
-    },
-    {
-      "id": "Banca",
-      "name": "Banca",
-      "color": "#B5893F"
+      "color": "#7500eb"
     }
   ],
   "items": [
@@ -39,6 +34,13 @@
       "start": "2026-08-13",
       "end": "2026-08-31",
       "category": "Pesquisa"
+    },
+    {
+      "id": "i7wbnrie",
+      "name": "Definição de regras, recompensas, pontuações, temática",
+      "start": "2026-08-13",
+      "end": "2026-08-23",
+      "category": "Revisão"
     }
   ],
   "milestones": [
