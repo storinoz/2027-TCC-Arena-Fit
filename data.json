@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "2027 ArenaFit",
+    "name": "TCC — Calculadora Acessível (modelo)",
     "start": "2026-03-01",
     "end": "2026-12-18",
     "contingency": "Validação física: fim de janeiro / início de fevereiro de 2027"
@@ -8,46 +8,110 @@
   "categories": [
     {
       "id": "Pesquisa",
-      "name": "CONIC",
-      "color": "#1eb300"
+      "name": "Pesquisa",
+      "color": "#2C4A66"
     },
     {
       "id": "Desenvolvimento",
-      "name": "COBRIC",
-      "color": "#d19900"
+      "name": "Desenvolvimento",
+      "color": "#AE5138"
     },
     {
       "id": "Escrita",
-      "name": "Documentação",
-      "color": "#0008ff"
+      "name": "Escrita",
+      "color": "#6C5170"
     },
     {
       "id": "Revisão",
-      "name": "Projeto",
-      "color": "#7500eb"
+      "name": "Revisão",
+      "color": "#54744F"
+    },
+    {
+      "id": "Banca",
+      "name": "Banca",
+      "color": "#B5893F"
     }
   ],
   "items": [
     {
-      "id": "ildf6y8j",
-      "name": "Doc CONIC parte 01",
-      "start": "2026-08-13",
-      "end": "2026-08-31",
+      "id": "i1",
+      "name": "Revisão bibliográfica",
+      "start": "2026-03-01",
+      "end": "2026-04-30",
       "category": "Pesquisa"
     },
     {
-      "id": "i7wbnrie",
-      "name": "Definição de regras, recompensas, pontuações, temática",
-      "start": "2026-08-13",
-      "end": "2026-08-23",
+      "id": "i2",
+      "name": "Definição de requisitos",
+      "start": "2026-04-01",
+      "end": "2026-04-20",
+      "category": "Pesquisa"
+    },
+    {
+      "id": "i3",
+      "name": "Desenvolvimento do protótipo",
+      "start": "2026-04-21",
+      "end": "2026-07-15",
+      "category": "Desenvolvimento"
+    },
+    {
+      "id": "i4",
+      "name": "Testes de acessibilidade",
+      "start": "2026-07-16",
+      "end": "2026-08-10",
+      "category": "Desenvolvimento"
+    },
+    {
+      "id": "i5",
+      "name": "Escrita do TCC",
+      "start": "2026-06-01",
+      "end": "2026-11-15",
+      "category": "Escrita"
+    },
+    {
+      "id": "i6",
+      "name": "Revisão final do texto",
+      "start": "2026-11-16",
+      "end": "2026-12-05",
       "category": "Revisão"
+    },
+    {
+      "id": "i7",
+      "name": "Preparação da defesa",
+      "start": "2026-12-01",
+      "end": "2026-12-17",
+      "category": "Banca"
     }
   ],
   "milestones": [
     {
-      "id": "mczt14xe",
-      "name": "Data final Publicação CONIC",
-      "date": "2026-08-31",
+      "id": "m1",
+      "name": "Entrega do pré-projeto",
+      "date": "2026-03-15",
+      "done": true
+    },
+    {
+      "id": "m2",
+      "name": "Reunião de orientação (COBRIC)",
+      "date": "2026-05-10",
+      "done": true
+    },
+    {
+      "id": "m3",
+      "name": "Entrega parcial (qualificação)",
+      "date": "2026-08-07",
+      "done": false
+    },
+    {
+      "id": "m4",
+      "name": "Entrega da versão final",
+      "date": "2026-12-10",
+      "done": false
+    },
+    {
+      "id": "m5",
+      "name": "Defesa do TCC",
+      "date": "2026-12-18",
       "done": false
     }
   ]
