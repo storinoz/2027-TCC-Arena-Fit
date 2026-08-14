@@ -6,6 +6,15 @@
 <title>Cronograma do Projeto</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  // applied before first paint to avoid a flash of the wrong theme; dark is the default
+  (function(){
+    try{
+      var t = localStorage.getItem("cronograma_theme_v1") || "dark";
+      document.documentElement.setAttribute("data-theme", t);
+    }catch(e){ document.documentElement.setAttribute("data-theme", "dark"); }
+  })();
+</script>
 <style>
   :root{
     --bg:#F6F2E9;
@@ -27,8 +36,38 @@
     --slate-soft:#E2E7EA;
     --plum:#6C5170;
     --plum-soft:#EAE1EA;
+    --stripe:#EFE9D9;
+    --hover-bg:#FAF7EF;
+    --input-bg:#FCFAF4;
+    --overlay-bg:rgba(38,36,30,.45);
     --shadow: 0 1px 2px rgba(38,36,30,0.06), 0 6px 20px -8px rgba(38,36,30,0.15);
     --radius: 10px;
+  }
+  html[data-theme="dark"]{
+    --bg:#14161C;
+    --paper-line:#22252E;
+    --panel:#1B1E27;
+    --ink:#ECE9DF;
+    --ink-soft:#A6A192;
+    --ink-faint:#6C6858;
+    --rule:#2D313B;
+    --navy:#7FB0D6;
+    --navy-soft:#20303D;
+    --amber:#E6A855;
+    --amber-soft:#3A2C18;
+    --sage:#87B978;
+    --sage-soft:#212F1E;
+    --clay:#E08464;
+    --clay-soft:#3B2119;
+    --slate:#9BABB9;
+    --slate-soft:#212832;
+    --plum:#C098C8;
+    --plum-soft:#2A2233;
+    --stripe:#252932;
+    --hover-bg:#20232C;
+    --input-bg:#20232B;
+    --overlay-bg:rgba(0,0,0,.6);
+    --shadow: 0 1px 2px rgba(0,0,0,.45), 0 6px 20px -8px rgba(0,0,0,.65);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -40,6 +79,7 @@
     font-family:'IBM Plex Sans', system-ui, sans-serif;
     line-height:1.5;
     padding-bottom:80px;
+    transition:background .2s ease, color .2s ease;
   }
   .wrap{max-width:1080px; margin:0 auto; padding:0 20px;}
   header.top{
@@ -75,6 +115,14 @@
     display:flex; gap:18px; flex-wrap:wrap; align-items:center;
   }
   .range-line b{color:var(--ink); font-weight:600;}
+  .date-inline{
+    font-family:'IBM Plex Mono', monospace; font-size:13.5px; font-weight:600; color:var(--ink);
+    background:transparent; border:1px solid transparent; border-radius:5px;
+    padding:2px 5px; cursor:pointer; -webkit-appearance:none; appearance:none;
+    color-scheme:light dark;
+  }
+  .date-inline:hover{border-color:var(--rule); background:var(--input-bg);}
+  .date-inline:focus{outline:none; border-color:var(--navy); background:var(--input-bg);}
   .toolbar{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
   button, .btn{
     font-family:'IBM Plex Sans', sans-serif;
@@ -86,16 +134,16 @@
     color:var(--ink);
     padding:8px 14px;
     cursor:pointer;
-    transition:transform .08s ease, background .15s ease;
+    transition:transform .08s ease, background .15s ease, color .15s ease;
   }
-  button:hover{background:var(--ink); color:#fff;}
+  button:hover{background:var(--ink); color:var(--bg);}
   button:active{transform:scale(.97);}
-  button.primary{background:var(--navy); color:#fff; border-color:var(--navy);}
-  button.primary:hover{background:#1e3549;}
+  button.primary{background:var(--navy); color:var(--bg); border-color:var(--navy);}
+  button.primary:hover{filter:brightness(0.88);}
   button.ghost{border-color:var(--rule); color:var(--ink-soft); font-size:12.5px; padding:6px 10px;}
-  button.ghost:hover{background:var(--ink-soft); color:#fff;}
+  button.ghost:hover{background:var(--ink-soft); color:var(--bg);}
   button.danger{border-color:var(--clay); color:var(--clay); background:transparent;}
-  button.danger:hover{background:var(--clay); color:#fff;}
+  button.danger:hover{background:var(--clay); color:var(--bg);}
   input[type=file]{display:none;}
 
   section{margin-bottom:36px;}
@@ -141,7 +189,7 @@
     flex:1; font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft);
     border-left:1px dashed var(--rule); padding-left:6px; text-transform:uppercase; letter-spacing:.05em;
   }
-  .gantt-row{display:flex; align-items:center; min-height:38px; border-bottom:1px solid #EFE9D9; position:relative;}
+  .gantt-row{display:flex; align-items:center; min-height:38px; border-bottom:1px solid var(--stripe); position:relative;}
   .gantt-row:last-child{border-bottom:none;}
   .gantt-label{
     width:190px; flex-shrink:0; font-size:13px; padding-right:10px; cursor:pointer;
@@ -149,7 +197,7 @@
   }
   .gantt-label .swatch{width:9px; height:9px; border-radius:2px; flex-shrink:0;}
   .gantt-label span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .gantt-track{flex:1; position:relative; height:22px; background:repeating-linear-gradient(90deg, #EFE9D9 0, #EFE9D9 1px, transparent 1px, transparent calc(100%/10));}
+  .gantt-track{flex:1; position:relative; height:22px; background:repeating-linear-gradient(90deg, var(--stripe) 0, var(--stripe) 1px, transparent 1px, transparent calc(100%/10));}
   .gantt-bar{
     position:absolute; top:3px; height:16px; border-radius:5px; cursor:pointer;
     box-shadow:0 1px 2px rgba(0,0,0,.15); transition:filter .1s;
@@ -223,7 +271,7 @@
     display:flex; justify-content:space-between; align-items:center; padding:11px 14px; cursor:pointer;
     font-size:13.5px; font-weight:500;
   }
-  .week-head:hover{background:#FAF7EF;}
+  .week-head:hover{background:var(--hover-bg);}
   .week-head .range{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); font-weight:400;}
   .week-head .chev{transition:transform .15s; color:var(--ink-faint);}
   .week.open .chev{transform:rotate(90deg);}
@@ -238,7 +286,7 @@
 
   /* modal */
   .overlay{
-    position:fixed; inset:0; background:rgba(38,36,30,.45); display:none;
+    position:fixed; inset:0; background:var(--overlay-bg); display:none;
     align-items:center; justify-content:center; z-index:50; padding:16px;
   }
   .overlay.show{display:flex;}
@@ -251,7 +299,7 @@
   .field label{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:5px; font-family:'IBM Plex Mono',monospace;}
   .field input, .field select{
     width:100%; padding:9px 10px; border:1.5px solid var(--rule); border-radius:6px;
-    font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; background:#FCFAF4;
+    font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; background:var(--input-bg); color:var(--ink);
   }
   .field input:focus, .field select:focus{outline:none; border-color:var(--navy);}
   .field-row{display:flex; gap:10px;}
@@ -282,22 +330,29 @@
 <div class="wrap">
 
   <header class="top">
-    <div class="eyebrow"><span class="dot"></span>CRONOGRAMA DO PROJETO — EDITÁVEL</div>
+    <div class="eyebrow">
+      <span class="dot"></span>CRONOGRAMA DO PROJETO — EDITÁVEL
+      <button class="ghost" id="btnThemeToggle" style="margin-left:auto; padding:4px 10px; font-size:12px;">☀️ Modo claro</button>
+    </div>
     <h1 id="projTitle" contenteditable="true" spellcheck="false"></h1>
     <div class="range-line">
-      <span>Início <b id="rangeStart"></b></span>
+      <span>Início <input type="date" id="rangeStartInput" class="date-inline"></span>
       <span>·</span>
-      <span>Encerramento <b id="rangeEnd"></b></span>
-      <span id="contingencyLine"></span>
+      <span>Encerramento <input type="date" id="rangeEndInput" class="date-inline"></span>
     </div>
     <div class="toolbar">
       <button class="primary" id="btnAddItem">+ Adicionar fase/tarefa</button>
       <button id="btnAddMilestone">+ Adicionar marco</button>
       <button class="ghost" id="btnManageCategories">Gerenciar categorias</button>
-      <button class="ghost" id="btnExport">Exportar dados (.json)</button>
-      <button class="ghost" id="btnImportTrigger">Importar dados</button>
-      <button class="ghost" id="btnReset">Restaurar exemplo</button>
-      <input type="file" id="btnImport" accept="application/json">
+    </div>
+    <div style="margin-top:8px;">
+      <button class="sync-toggle" id="btnAdvancedToggle" style="font-size:12px;">mais opções (backup manual)</button>
+      <div class="toolbar" id="advancedOptions" style="display:none; margin-top:8px;">
+        <button class="ghost" id="btnExport">Exportar dados (.json)</button>
+        <button class="ghost" id="btnImportTrigger">Importar dados</button>
+        <button class="ghost" id="btnReset">Restaurar exemplo</button>
+        <input type="file" id="btnImport" accept="application/json">
+      </div>
     </div>
   </header>
 
@@ -324,7 +379,7 @@
         <div class="toolbar">
           <button class="primary" id="btnGhConnect">Salvar configuração</button>
           <button class="ghost" id="btnGhLoad">Carregar do GitHub</button>
-          <button class="ghost" id="btnGhSave">Salvar no GitHub agora</button>
+          <button class="ghost" id="btnGhSave">Forçar sincronização agora</button>
           <button class="ghost" id="btnGhForget">Esquecer token neste navegador</button>
         </div>
         <p class="sync-note">
@@ -334,7 +389,10 @@
           repositório. Use um <i>fine-grained token</i> restrito só a este repositório. O token fica salvo apenas
           no armazenamento local deste navegador — nunca é enviado a nenhum lugar além da própria API do GitHub.
           Qualquer pessoa com esse token pode editar o repositório, então trate-o como uma senha e não o compartilhe
-          publicamente.
+          publicamente.<br><br>
+          <b>Com o token preenchido, toda alteração é enviada ao GitHub automaticamente</b> (cerca de 1,5s depois
+          de você parar de editar, para agrupar cliques rápidos num só commit). O botão "Forçar sincronização
+          agora" só é necessário se algo falhar (ex: sem internet no momento) e você quiser tentar de novo na hora.
         </p>
       </div>
     </div>
@@ -350,6 +408,17 @@
       <p>Clique numa barra ou marco para editar. A linha âmbar é a data de hoje.</p>
     </div>
     <div class="panel">
+      <div class="toolbar" style="margin-top:0; margin-bottom:16px; align-items:flex-end;">
+        <div class="field" style="margin-bottom:0;">
+          <label>Ver de</label>
+          <input type="date" id="ganttViewStart">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>até</label>
+          <input type="date" id="ganttViewEnd">
+        </div>
+        <button class="ghost" id="btnGanttViewReset">Ver período completo</button>
+      </div>
       <div class="gantt-scroll">
         <div class="gantt" id="ganttChart"></div>
       </div>
@@ -377,6 +446,13 @@
     <div class="section-head">
       <h2><span class="idx">04</span> Cronograma semanal</h2>
       <p>Clique numa semana para expandir.</p>
+    </div>
+    <div class="toolbar" style="margin-top:0; margin-bottom:14px; align-items:center;">
+      <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft); cursor:pointer;">
+        <input type="checkbox" id="weekFilterOnlyContent" style="width:15px;height:15px;">
+        Mostrar só semanas com conteúdo
+      </label>
+      <span id="weekHiddenNote" style="font-size:12.5px; color:var(--ink-faint);"></span>
     </div>
     <div id="weekList"></div>
   </section>
@@ -478,6 +554,21 @@
 
   var STORAGE_KEY = "cronograma_projeto_v1";
 
+  // ---------- theme ----------
+  var THEME_KEY = "cronograma_theme_v1";
+  function currentTheme(){ return document.documentElement.getAttribute("data-theme") || "dark"; }
+  function applyThemeButtonLabel(){
+    var btn = document.getElementById("btnThemeToggle");
+    btn.textContent = currentTheme()==="dark" ? "☀️ Modo claro" : "🌙 Modo escuro";
+  }
+  document.getElementById("btnThemeToggle").addEventListener("click", function(){
+    var next = currentTheme()==="dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+    applyThemeButtonLabel();
+  });
+  applyThemeButtonLabel();
+
   var DEFAULT_CATEGORIES = [
     {id:"Pesquisa", name:"Pesquisa", color:"#2C4A66"},
     {id:"Desenvolvimento", name:"Desenvolvimento", color:"#AE5138"},
@@ -524,8 +615,9 @@
     }catch(e){}
     return seedData();
   }
-  function save(){
+  function save(skipSync){
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+    if(!skipSync) scheduleAutoSync();
   }
   function uid(prefix){ return prefix + Math.random().toString(36).slice(2,9); }
 
@@ -555,10 +647,39 @@
   function renderHeader(){
     var t = document.getElementById("projTitle");
     if(t.textContent !== data.project.name) t.textContent = data.project.name;
-    document.getElementById("rangeStart").textContent = fmt(data.project.start);
-    document.getElementById("rangeEnd").textContent = fmt(data.project.end);
-    document.getElementById("contingencyLine").textContent = data.project.contingency ? ("· " + data.project.contingency) : "";
+    document.getElementById("rangeStartInput").value = data.project.start;
+    document.getElementById("rangeEndInput").value = data.project.end;
   }
+
+  // ---------- project date range editing ----------
+  function onProjectRangeChange(){
+    var sInput = document.getElementById("rangeStartInput");
+    var eInput = document.getElementById("rangeEndInput");
+    var newStart = sInput.value;
+    var newEnd = eInput.value;
+    if(!newStart || !newEnd){ renderHeader(); return; } // revert to last valid values
+    if(newStart > newEnd){
+      alert("A data de início não pode ser depois da data de encerramento.");
+      renderHeader();
+      return;
+    }
+    var outsideItems = data.items.filter(function(it){ return it.start<newStart || it.end>newEnd; }).length;
+    var outsideMs = data.milestones.filter(function(m){ return m.date<newStart || m.date>newEnd; }).length;
+    if(outsideItems || outsideMs){
+      var msg = "Isso deixaria " + outsideItems + " fase(s)/tarefa(s) e " + outsideMs + " marco(s) fora do período do "
+        + "projeto (eles somem do Gantt e do cronograma semanal, mas não são apagados). Continuar?";
+      if(!confirm(msg)){ renderHeader(); return; }
+    }
+    data.project.start = newStart;
+    data.project.end = newEnd;
+    // the Gantt's own "Ver de/até" viewing window resets to the new full range
+    var gs = document.getElementById("ganttViewStart"), ge = document.getElementById("ganttViewEnd");
+    gs.value = newStart; ge.value = newEnd;
+    save();
+    renderAll();
+  }
+  document.getElementById("rangeStartInput").addEventListener("change", onProjectRangeChange);
+  document.getElementById("rangeEndInput").addEventListener("change", onProjectRangeChange);
 
   // ---------- render: stats ----------
   function renderStats(){
@@ -595,9 +716,43 @@
     });
   }
 
+  // ---------- gantt view range (viewing window only — does not affect stats/weeks) ----------
+  function ganttInputs(){
+    return { s: document.getElementById("ganttViewStart"), e: document.getElementById("ganttViewEnd") };
+  }
+  function initGanttViewInputs(){
+    var f = ganttInputs();
+    f.s.min = data.project.start; f.s.max = data.project.end;
+    f.e.min = data.project.start; f.e.max = data.project.end;
+    if(!f.s.value) f.s.value = data.project.start;
+    if(!f.e.value) f.e.value = data.project.end;
+  }
+  function getGanttViewRange(){
+    var f = ganttInputs();
+    var s = f.s.value || data.project.start;
+    var e = f.e.value || data.project.end;
+    // clamp to project bounds
+    if(s < data.project.start) s = data.project.start;
+    if(e > data.project.end) e = data.project.end;
+    if(s > data.project.end) s = data.project.end;
+    if(e < data.project.start) e = data.project.start;
+    if(s > e){ var tmp=s; s=e; e=tmp; }
+    return {start:s, end:e};
+  }
+  document.getElementById("ganttViewStart").addEventListener("change", function(){ renderGantt(); });
+  document.getElementById("ganttViewEnd").addEventListener("change", function(){ renderGantt(); });
+  document.getElementById("btnGanttViewReset").addEventListener("click", function(){
+    var f = ganttInputs();
+    f.s.value = data.project.start;
+    f.e.value = data.project.end;
+    renderGantt();
+  });
+
   // ---------- render: gantt ----------
   function renderGantt(){
-    var start = parseD(data.project.start), end = parseD(data.project.end);
+    initGanttViewInputs();
+    var view = getGanttViewRange();
+    var start = parseD(view.start), end = parseD(view.end);
     var totalDays = Math.max(1, daysBetween(start,end));
 
     // month ruler
@@ -612,14 +767,17 @@
       return '<div class="gantt-month">'+monthNames[m.getMonth()]+"/"+String(m.getFullYear()).slice(2)+"</div>";
     }).join("");
 
-    // rows
-    var rowsHtml = data.items.map(function(it){
+    // rows — only items that intersect the chosen view range are shown, clamped to its edges
+    var visibleItems = data.items.filter(function(it){ return it.end>=view.start && it.start<=view.end; });
+    var rowsHtml = visibleItems.map(function(it){
       var color = catById(it.category).color;
-      var s = parseD(it.start), e = parseD(it.end);
+      var clampedStart = it.start<view.start ? view.start : it.start;
+      var clampedEnd = it.end>view.end ? view.end : it.end;
+      var s = parseD(clampedStart), e = parseD(clampedEnd);
       var left = 100*daysBetween(start,s)/totalDays;
       var width = Math.max(1.2, 100*daysBetween(s,e)/totalDays);
       var todayMark = "";
-      if(TODAY>=data.project.start && TODAY<=data.project.end){
+      if(TODAY>=view.start && TODAY<=view.end){
         var tOff = 100*daysBetween(start, parseD(TODAY))/totalDays;
         todayMark = '<div class="gantt-today" style="left:'+tOff+'%"></div>';
       }
@@ -632,15 +790,15 @@
       + '</div>';
     }).join("");
 
-    // today flag row (only once, on top row track if exists)
-    var todayFlag = "";
-    if(TODAY>=data.project.start && TODAY<=data.project.end){
-      var tOff2 = 100*daysBetween(start, parseD(TODAY))/totalDays;
-      todayFlag = '<div style="position:relative;height:0;"><div class="gantt-today" style="left:calc(190px + '+tOff2+'% * (100% - 190px)/100%)"></div></div>';
+    if(!visibleItems.length){
+      rowsHtml = '<div class="gantt-row" style="padding-left:190px;"><p style="color:var(--ink-faint);font-style:italic;font-size:13px;">Nenhuma fase/tarefa neste período — ajuste "Ver de / até" acima.</p></div>';
     }
 
-    // milestones row
-    var msHtml = data.milestones.map(function(m){
+    // (the "hoje" dashed line is drawn per-row via .gantt-today inside the rows loop above)
+
+    // milestones row — only those inside the chosen view range
+    var visibleMs = data.milestones.filter(function(m){ return m.date>=view.start && m.date<=view.end; });
+    var msHtml = visibleMs.map(function(m){
       var off = 100*daysBetween(start, parseD(m.date))/totalDays;
       off = Math.min(Math.max(off,0),100);
       return '<div class="diamond'+(m.done?' done':'')+'" data-ms="'+m.id+'" style="left:'+off+'%" title="'+esc(m.name)+' · '+fmt(m.date)+'"></div>';
@@ -655,7 +813,7 @@
     // legend
     var legendHtml = data.categories.map(function(c){
       return '<span><span class="sw" style="background:'+c.color+'"></span>'+esc(c.name)+'</span>';
-    }).join("") + '<span><span class="sw" style="background:#D98E3F"></span>Hoje</span><span><span class="sw" style="background:#54744F"></span>Marco concluído</span>';
+    }).join("") + '<span><span class="sw" style="background:var(--amber)"></span>Hoje</span><span><span class="sw" style="background:var(--sage)"></span>Marco concluído</span>';
     document.getElementById("legend").innerHTML = legendHtml;
 
     // click handlers
@@ -713,6 +871,23 @@
   }
 
   // ---------- render: weeks ----------
+  // ---------- week visibility (personal viewing preference — not synced to GitHub) ----------
+  var WEEK_HIDDEN_KEY = "cronograma_hidden_weeks_v1";
+  var WEEK_FILTER_KEY = "cronograma_week_filter_v1";
+  function loadHiddenWeeks(){
+    try{ var raw = localStorage.getItem(WEEK_HIDDEN_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+    return [];
+  }
+  function saveHiddenWeeks(){ try{ localStorage.setItem(WEEK_HIDDEN_KEY, JSON.stringify(hiddenWeeks)); }catch(e){} }
+  var hiddenWeeks = loadHiddenWeeks();
+
+  var weekFilterEl = document.getElementById("weekFilterOnlyContent");
+  try{ weekFilterEl.checked = localStorage.getItem(WEEK_FILTER_KEY) === "1"; }catch(e){}
+  weekFilterEl.addEventListener("change", function(){
+    try{ localStorage.setItem(WEEK_FILTER_KEY, weekFilterEl.checked ? "1" : "0"); }catch(e){}
+    renderWeeks();
+  });
+
   function renderWeeks(){
     var start = parseD(data.project.start), end = parseD(data.project.end);
     // align to Sunday
@@ -725,11 +900,19 @@
       cur = new Date(cur); cur.setDate(cur.getDate()+7);
     }
     var todayD = parseD(TODAY);
+    var onlyContent = weekFilterEl.checked;
+    var hiddenCount = 0;
+
     var html = weeks.map(function(w, idx){
       var wStartISO = isoOf(w.start), wEndISO = isoOf(w.end);
       var isCurrent = todayD>=w.start && todayD<=w.end;
       var items = data.items.filter(function(it){ return it.start<=wEndISO && it.end>=wStartISO; });
       var mss = data.milestones.filter(function(m){ return m.date>=wStartISO && m.date<=wEndISO; });
+      var isHidden = hiddenWeeks.indexOf(wStartISO) !== -1;
+
+      if(isHidden){ hiddenCount++; return ""; }
+      if(onlyContent && !items.length && !mss.length){ return ""; }
+
       var body = "";
       if(items.length){
         body += "<ul>" + items.map(function(it){ return "<li>"+esc(it.name)+" <span style='color:var(--ink-faint)'>("+fmt(it.start)+"–"+fmt(it.end)+")</span></li>"; }).join("") + "</ul>";
@@ -740,12 +923,41 @@
       if(!items.length && !mss.length){
         body = '<p class="empty">Sem itens nesta semana.</p>';
       }
-      return '<div class="week'+(isCurrent?' week-current':'')+'" data-week="'+idx+'">'
-        + '<div class="week-head"><span>Semana '+(idx+1)+(isCurrent?' — atual':'')+'</span><span class="range">'+fmt(wStartISO)+' – '+fmt(wEndISO)+' <span class="chev">▸</span></span></div>'
+      return '<div class="week'+(isCurrent?' week-current':'')+'" data-week="'+idx+'" data-week-start="'+wStartISO+'">'
+        + '<div class="week-head"><span>Semana '+(idx+1)+(isCurrent?' — atual':'')+'</span>'
+          + '<span class="range">'+fmt(wStartISO)+' – '+fmt(wEndISO)+' '
+            + '<button class="ghost" data-hide-week="'+wStartISO+'" style="padding:2px 8px; font-size:11px; margin-left:8px;">ocultar</button>'
+            + '<span class="chev">▸</span>'
+          + '</span>'
+        + '</div>'
         + '<div class="week-body"><div class="week-body-inner">'+body+'</div></div>'
       + '</div>';
     }).join("");
+
+    if(!html){
+      html = '<p style="color:var(--ink-faint);font-style:italic;font-size:13px;">Nenhuma semana para mostrar com os filtros atuais.</p>';
+    }
     document.getElementById("weekList").innerHTML = html;
+
+    var note = document.getElementById("weekHiddenNote");
+    note.innerHTML = hiddenCount ? (hiddenCount + " semana(s) oculta(s) · <button class=\"sync-toggle\" id=\"btnShowHiddenWeeks\" style=\"font-size:12.5px;\">mostrar todas</button>") : "";
+    if(hiddenCount){
+      document.getElementById("btnShowHiddenWeeks").addEventListener("click", function(){
+        hiddenWeeks = [];
+        saveHiddenWeeks();
+        renderWeeks();
+      });
+    }
+
+    document.querySelectorAll('[data-hide-week]').forEach(function(el){
+      el.addEventListener("click", function(e){
+        e.stopPropagation();
+        var wStart = el.getAttribute("data-hide-week");
+        if(hiddenWeeks.indexOf(wStart)===-1) hiddenWeeks.push(wStart);
+        saveHiddenWeeks();
+        renderWeeks();
+      });
+    });
     document.querySelectorAll('[data-week]').forEach(function(el){
       el.querySelector(".week-head").addEventListener("click", function(){
         el.classList.toggle("open");
@@ -940,6 +1152,14 @@
     renderCatManagerList();
   });
 
+  // ---------- advanced options disclosure ----------
+  document.getElementById("btnAdvancedToggle").addEventListener("click", function(){
+    var box = document.getElementById("advancedOptions");
+    var open = box.style.display !== "none";
+    box.style.display = open ? "none" : "flex";
+    this.textContent = open ? "mais opções (backup manual)" : "ocultar opções avançadas";
+  });
+
   // ---------- title edit ----------
   document.getElementById("projTitle").addEventListener("blur", function(){
     var v = this.textContent.trim();
@@ -1065,7 +1285,7 @@
         if(!json.project || !json.items || !json.milestones) throw new Error("formato inválido");
         data = json;
         ensureCategories();
-        save();
+        save(true); // just cache locally — this data already came FROM GitHub, no need to write it back
         renderAll();
         updateSyncStatus();
         if(showAlerts) alert("Dados carregados do GitHub.");
@@ -1080,9 +1300,9 @@
       });
   }
 
-  function saveToGithub(){
-    if(!ghConfig.owner || !ghConfig.repo){ alert("Preencha usuário e repositório primeiro."); return; }
-    if(!ghConfig.token){ alert("Cole um token de acesso pessoal com permissão de escrita para salvar no GitHub."); return; }
+  function saveToGithub(silent){
+    if(!ghConfig.owner || !ghConfig.repo){ if(!silent) alert("Preencha usuário e repositório primeiro."); return; }
+    if(!ghConfig.token){ if(!silent) alert("Cole um token de acesso pessoal com permissão de escrita para salvar no GitHub."); return; }
     updateSyncStatus("Salvando no GitHub…");
     var headers = { "Authorization": "token " + ghConfig.token };
     fetch(ghContentsUrl() + "?ref=" + encodeURIComponent(ghConfig.branch), { headers: headers })
@@ -1106,22 +1326,34 @@
         return r.json();
       })
       .then(function(){
-        updateSyncStatus("Salvo no GitHub às " + new Date().toLocaleTimeString());
+        updateSyncStatus("Sincronizado com o GitHub às " + new Date().toLocaleTimeString());
       })
       .catch(function(err){
         if(err && err.conflict){
           updateSyncStatus("Conflito: alguém salvou uma versão mais nova — recarregando");
           loadFromGithub(false);
         } else {
-          updateSyncStatus("Falha ao salvar no GitHub");
+          updateSyncStatus("Falha ao sincronizar com o GitHub — última alteração ficou salva só neste navegador");
           console.error(err);
-          alert("Falha ao salvar no GitHub: " + (err.message || "erro desconhecido"));
+          if(!silent) alert("Falha ao salvar no GitHub: " + (err.message || "erro desconhecido"));
         }
       });
   }
 
+  // ---------- automatic sync: every edit debounces into one background commit ----------
+  var autoSyncTimer = null;
+  function scheduleAutoSync(){
+    if(!ghConfig || !ghConfig.owner || !ghConfig.repo || !ghConfig.token) return; // nothing configured to write to
+    updateSyncStatus("Alterações pendentes — sincronizando em instantes…");
+    if(autoSyncTimer) clearTimeout(autoSyncTimer);
+    autoSyncTimer = setTimeout(function(){
+      autoSyncTimer = null;
+      saveToGithub(true); // silent: background saves shouldn't interrupt with alert popups
+    }, 1500);
+  }
+
   document.getElementById("btnGhLoad").addEventListener("click", function(){ loadFromGithub(true); });
-  document.getElementById("btnGhSave").addEventListener("click", saveToGithub);
+  document.getElementById("btnGhSave").addEventListener("click", function(){ saveToGithub(false); });
 
   // ---------- init ----------
   fillGhForm();
