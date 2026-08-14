@@ -34,39 +34,11 @@
   ],
   "items": [
     {
-      "id": "i1",
-      "name": "Revisão bibliográfica",
-      "start": "2026-03-01",
-      "end": "2026-04-30",
-      "category": "Pesquisa"
-    },
-    {
-      "id": "i2",
-      "name": "Definição de requisitos",
-      "start": "2026-04-01",
-      "end": "2026-04-20",
-      "category": "Pesquisa"
-    },
-    {
-      "id": "i3",
-      "name": "Desenvolvimento do protótipo",
-      "start": "2026-04-21",
-      "end": "2026-07-15",
-      "category": "Desenvolvimento"
-    },
-    {
       "id": "i4",
       "name": "Testes de acessibilidade",
       "start": "2026-07-16",
       "end": "2026-08-10",
       "category": "Desenvolvimento"
-    },
-    {
-      "id": "i5",
-      "name": "Escrita do TCC",
-      "start": "2026-06-01",
-      "end": "2026-11-15",
-      "category": "Escrita"
     },
     {
       "id": "i6",
