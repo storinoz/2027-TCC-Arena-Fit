@@ -39,6 +39,20 @@
       "start": "2026-07-16",
       "end": "2026-08-10",
       "category": "Desenvolvimento"
+    },
+    {
+      "id": "i6",
+      "name": "Revisão final do texto",
+      "start": "2026-11-16",
+      "end": "2026-12-05",
+      "category": "Revisão"
+    },
+    {
+      "id": "i7",
+      "name": "Preparação da defesa",
+      "start": "2026-12-01",
+      "end": "2026-12-17",
+      "category": "Banca"
     }
   ],
   "milestones": [
@@ -64,12 +78,6 @@
       "id": "m4",
       "name": "Entrega da versão final",
       "date": "2026-12-10",
-      "done": false
-    },
-    {
-      "id": "m5",
-      "name": "Defesa do TCC",
-      "date": "2026-12-18",
       "done": false
     }
   ]
