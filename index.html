@@ -1006,8 +1006,8 @@
     document.getElementById("itemModalTitle").textContent = it ? "Editar fase/tarefa" : "Adicionar fase/tarefa";
     document.getElementById("itemId").value = it ? it.id : "";
     document.getElementById("itemName").value = it ? it.name : "";
-    document.getElementById("itemStart").value = it ? it.start : data.project.start;
-    document.getElementById("itemEnd").value = it ? it.end : data.project.start;
+    document.getElementById("itemStart").value = it ? it.start : TODAY;
+    document.getElementById("itemEnd").value = it ? it.end : TODAY;
     document.getElementById("itemCategory").value = it ? it.category : (data.categories[0] ? data.categories[0].id : "");
     document.getElementById("itemDelete").style.display = it ? "inline-block" : "none";
     itemOverlay.classList.add("show");
@@ -1051,7 +1051,7 @@
     document.getElementById("msModalTitle").textContent = m ? "Editar marco" : "Adicionar marco";
     document.getElementById("msId").value = m ? m.id : "";
     document.getElementById("msName").value = m ? m.name : "";
-    document.getElementById("msDate").value = m ? m.date : data.project.start;
+    document.getElementById("msDate").value = m ? m.date : TODAY;
     document.getElementById("msDelete").style.display = m ? "inline-block" : "none";
     msOverlay.classList.add("show");
     document.getElementById("msName").focus();
@@ -1226,9 +1226,29 @@
 
   // ---------- GitHub sync ----------
   var GH_KEY = "cronograma_gh_config_v1";
+
+  // when this page is hosted at https://USER.github.io/REPO/, we already know the owner and repo
+  // from the URL itself — no reason to require every visitor to type it in just to VIEW the data.
+  function detectRepoFromLocation(){
+    var host = window.location.hostname; // e.g. "storinoz.github.io"
+    if(!/\.github\.io$/i.test(host)) return null;
+    var owner = host.replace(/\.github\.io$/i, "");
+    var seg = window.location.pathname.split("/").filter(Boolean)[0]; // first path segment = repo name
+    if(!owner || !seg) return null;
+    return {owner: owner, repo: seg};
+  }
+
   function loadGhConfig(){
-    try{ var raw = localStorage.getItem(GH_KEY); if(raw) return JSON.parse(raw); }catch(e){}
-    return {owner:"", repo:"", branch:"main", path:"data.json", token:""};
+    var stored = null;
+    try{ var raw = localStorage.getItem(GH_KEY); if(raw) stored = JSON.parse(raw); }catch(e){}
+    var cfg = stored || {owner:"", repo:"", branch:"main", path:"data.json", token:""};
+    // fill in owner/repo from the URL ONLY if nothing was explicitly saved before — an explicit
+    // saved config (e.g. pointing at a different repo) always wins over auto-detection.
+    if(!cfg.owner || !cfg.repo){
+      var detected = detectRepoFromLocation();
+      if(detected){ cfg.owner = cfg.owner || detected.owner; cfg.repo = cfg.repo || detected.repo; }
+    }
+    return cfg;
   }
   function saveGhConfig(){ try{ localStorage.setItem(GH_KEY, JSON.stringify(ghConfig)); }catch(e){} }
   var ghConfig = loadGhConfig();
