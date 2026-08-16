@@ -30,7 +30,21 @@
   "items": [
     {
       "id": "iwa0a3yg",
-      "name": "Definição de regras, pontuações",
+      "name": "Definição de regras do app",
+      "start": "2026-08-16",
+      "end": "2026-08-22",
+      "category": "cat_mug29bz"
+    },
+    {
+      "id": "im9aa40t",
+      "name": "Definição de pontuação do app",
+      "start": "2026-08-16",
+      "end": "2026-08-22",
+      "category": "cat_mug29bz"
+    },
+    {
+      "id": "i3q1gqpo",
+      "name": "Definição de temática do app",
       "start": "2026-08-16",
       "end": "2026-08-22",
       "category": "cat_mug29bz"
