@@ -363,7 +363,11 @@
       <span class="sync-status" id="syncStatus"><span class="pip"></span><span id="syncStatusText">Não configurado — dados salvos apenas neste navegador</span></span>
     </div>
     <div class="panel">
-      <button class="sync-toggle" id="syncToggle">mostrar configuração</button>
+      <div class="toolbar" style="margin-top:0;">
+        <button class="sync-toggle" id="syncToggle" style="align-self:center;">mostrar configuração</button>
+        <button class="ghost" id="btnSaveLocal">Salvar no navegador</button>
+        <button class="ghost" id="btnGhSave">Salvar no GitHub agora</button>
+      </div>
       <div id="syncConfigForm" style="display:none; margin-top:14px;">
         <div class="field-row">
           <div class="field"><label>Usuário ou organização</label><input type="text" id="ghOwner" placeholder="ex: gustaeagle"></div>
@@ -380,7 +384,6 @@
         <div class="toolbar">
           <button class="primary" id="btnGhConnect">Salvar configuração</button>
           <button class="ghost" id="btnGhLoad">Carregar do GitHub</button>
-          <button class="ghost" id="btnGhSave">Salvar no GitHub agora</button>
           <button class="ghost" id="btnGhForget">Esquecer token neste navegador</button>
         </div>
         <p class="sync-note">
@@ -392,8 +395,9 @@
           Qualquer pessoa com esse token pode editar o repositório, então trate-o como uma senha e não o compartilhe
           publicamente.<br><br>
           <b>A sincronização é manual</b> — nada é enviado ao GitHub sozinho. Depois de editar, clique em
-          "Salvar no GitHub agora". Se você tentar fechar ou sair da página com alterações ainda não enviadas,
-          o navegador mostra um aviso antes de deixar você sair.
+          "Salvar no GitHub agora" (ou apenas "Salvar no navegador" se ainda não quiser publicar). Se você tentar
+          fechar ou sair da página com alterações do GitHub ainda não enviadas, o navegador mostra um aviso antes
+          de deixar você sair.
         </p>
       </div>
     </div>
@@ -452,6 +456,10 @@
       <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft); cursor:pointer;">
         <input type="checkbox" id="weekFilterOnlyContent" style="width:15px;height:15px;">
         Mostrar só semanas com conteúdo
+      </label>
+      <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft); cursor:pointer;">
+        <input type="checkbox" id="weekFilterFromToday" style="width:15px;height:15px;">
+        Mostrar da semana atual em diante
       </label>
       <span id="weekHiddenNote" style="font-size:12.5px; color:var(--ink-faint);"></span>
     </div>
@@ -581,28 +589,14 @@
   function seedData(){
     return {
       project:{
-        name:"TCC — Calculadora Acessível (modelo)",
+        name:"Nome do Projeto aqui",
         start:"2026-03-01",
         end:"2026-12-18",
-        contingency:"Validação física: fim de janeiro / início de fevereiro de 2027"
+        contingency:""
       },
       categories: DEFAULT_CATEGORIES.map(function(c){ return {id:c.id, name:c.name, color:c.color}; }),
-      items:[
-        {id:"i1", name:"Revisão bibliográfica", start:"2026-03-01", end:"2026-04-30", category:"Pesquisa"},
-        {id:"i2", name:"Definição de requisitos", start:"2026-04-01", end:"2026-04-20", category:"Pesquisa"},
-        {id:"i3", name:"Desenvolvimento do protótipo", start:"2026-04-21", end:"2026-07-15", category:"Desenvolvimento"},
-        {id:"i4", name:"Testes de acessibilidade", start:"2026-07-16", end:"2026-08-10", category:"Desenvolvimento"},
-        {id:"i5", name:"Escrita do TCC", start:"2026-06-01", end:"2026-11-15", category:"Escrita"},
-        {id:"i6", name:"Revisão final do texto", start:"2026-11-16", end:"2026-12-05", category:"Revisão"},
-        {id:"i7", name:"Preparação da defesa", start:"2026-12-01", end:"2026-12-17", category:"Banca"}
-      ],
-      milestones:[
-        {id:"m1", name:"Entrega do pré-projeto", date:"2026-03-15", done:true},
-        {id:"m2", name:"Reunião de orientação (COBRIC)", date:"2026-05-10", done:true},
-        {id:"m3", name:"Entrega parcial (qualificação)", date:"2026-08-07", done:false},
-        {id:"m4", name:"Entrega da versão final", date:"2026-12-10", done:false},
-        {id:"m5", name:"Defesa do TCC", date:"2026-12-18", done:false}
-      ]
+      items:[],
+      milestones:[]
     };
   }
 
@@ -616,13 +610,21 @@
     }catch(e){}
     return seedData();
   }
-  var hasUnsyncedChanges = false;
-  function save(fromRemote){
+  var DIRTY_KEY = "cronograma_dirty_v1";
+  function loadDirtyFlag(){ try{ return localStorage.getItem(DIRTY_KEY) === "1"; }catch(e){ return false; } }
+  function setDirtyFlag(v){ try{ localStorage.setItem(DIRTY_KEY, v ? "1" : "0"); }catch(e){} }
+  var hasUnsyncedChanges = loadDirtyFlag(); // survives a reload — this is what prevents an unsynced draft from being silently overwritten
+  function persistLocal(){
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  }
+  function save(fromRemote){
+    persistLocal();
     if(fromRemote){
       hasUnsyncedChanges = false; // this data just came FROM GitHub — nothing new to push
+      setDirtyFlag(false);
     } else {
       hasUnsyncedChanges = true;
+      setDirtyFlag(true);
       if(ghConfigReady()) updateSyncStatus("Alterações não sincronizadas — clique em \"Salvar no GitHub agora\" ou feche a página com cuidado");
     }
   }
@@ -881,6 +883,7 @@
   // ---------- week visibility (personal viewing preference — not synced to GitHub) ----------
   var WEEK_HIDDEN_KEY = "cronograma_hidden_weeks_v1";
   var WEEK_FILTER_KEY = "cronograma_week_filter_v1";
+  var WEEK_FILTER_FROM_TODAY_KEY = "cronograma_week_filter_from_today_v1";
   function loadHiddenWeeks(){
     try{ var raw = localStorage.getItem(WEEK_HIDDEN_KEY); if(raw) return JSON.parse(raw); }catch(e){}
     return [];
@@ -892,6 +895,13 @@
   try{ weekFilterEl.checked = localStorage.getItem(WEEK_FILTER_KEY) === "1"; }catch(e){}
   weekFilterEl.addEventListener("change", function(){
     try{ localStorage.setItem(WEEK_FILTER_KEY, weekFilterEl.checked ? "1" : "0"); }catch(e){}
+    renderWeeks();
+  });
+
+  var weekFilterFromTodayEl = document.getElementById("weekFilterFromToday");
+  try{ weekFilterFromTodayEl.checked = localStorage.getItem(WEEK_FILTER_FROM_TODAY_KEY) === "1"; }catch(e){}
+  weekFilterFromTodayEl.addEventListener("change", function(){
+    try{ localStorage.setItem(WEEK_FILTER_FROM_TODAY_KEY, weekFilterFromTodayEl.checked ? "1" : "0"); }catch(e){}
     renderWeeks();
   });
 
@@ -908,6 +918,7 @@
     }
     var todayD = parseD(TODAY);
     var onlyContent = weekFilterEl.checked;
+    var fromTodayOnly = weekFilterFromTodayEl.checked;
     var hiddenCount = 0;
 
     var html = weeks.map(function(w, idx){
@@ -918,6 +929,7 @@
       var isHidden = hiddenWeeks.indexOf(wStartISO) !== -1;
 
       if(isHidden){ hiddenCount++; return ""; }
+      if(fromTodayOnly && w.end < todayD && !isCurrent){ return ""; } // drop weeks that ended before today
       if(onlyContent && !items.length && !mss.length){ return ""; }
 
       var body = "";
@@ -1338,6 +1350,7 @@
       })
       .then(function(){
         hasUnsyncedChanges = false;
+        setDirtyFlag(false);
         updateSyncStatus("Sincronizado com o GitHub às " + new Date().toLocaleTimeString());
         if(doneCb) doneCb();
       })
@@ -1382,6 +1395,13 @@
 
   document.getElementById("btnGhLoad").addEventListener("click", function(){ loadFromGithub(true); });
   document.getElementById("btnGhSave").addEventListener("click", function(){ runQueuedSync(); });
+  document.getElementById("btnSaveLocal").addEventListener("click", function(){
+    persistLocal(); // pure local write — does NOT touch the GitHub "unsynced changes" flag
+    if(!ghConfigReady()){
+      updateSyncStatus("Salvo neste navegador às " + new Date().toLocaleTimeString());
+    }
+    alert("Salvo neste navegador." + (ghConfigReady() ? " Lembre-se de clicar em \"Salvar no GitHub agora\" para publicar." : ""));
+  });
 
   // ---------- warn before closing the page with unsynced changes ----------
   // most browsers ignore any custom message and show their own generic "leave site?" text —
@@ -1397,7 +1417,15 @@
   // ---------- init ----------
   fillGhForm();
   renderAll();
-  if(ghConfig.owner && ghConfig.repo){ loadFromGithub(false); }
+  if(ghConfig.owner && ghConfig.repo){
+    if(hasUnsyncedChanges){
+      // don't silently overwrite an unsynced local draft with the (older) remote version —
+      // this was exactly the "it loads an old version when I make changes" symptom.
+      updateSyncStatus("Você tem alterações locais não sincronizadas de antes — clique em \"Salvar no GitHub agora\" para enviá-las, ou em \"Carregar do GitHub\" para descartá-las e puxar a versão mais recente");
+    } else {
+      loadFromGithub(false);
+    }
+  }
 })();
 </script>
 </body>
