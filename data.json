@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "ArenaFit",
+    "name": "TCC — Calculadora Acessível (modelo)",
     "start": "2026-03-01",
     "end": "2026-12-18",
     "contingency": "Validação física: fim de janeiro / início de fevereiro de 2027"
@@ -33,13 +33,6 @@
     }
   ],
   "items": [
-    {
-      "id": "i1",
-      "name": "Revisão bibliográfica",
-      "start": "2026-03-01",
-      "end": "2026-04-30",
-      "category": "Pesquisa"
-    },
     {
       "id": "i2",
       "name": "Definição de requisitos",
