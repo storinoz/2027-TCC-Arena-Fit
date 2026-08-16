@@ -7,31 +7,41 @@
   },
   "categories": [
     {
-      "id": "Pesquisa",
-      "name": "Pesquisa",
-      "color": "#2C4A66"
-    },
-    {
-      "id": "Desenvolvimento",
-      "name": "Desenvolvimento",
-      "color": "#AE5138"
-    },
-    {
       "id": "Escrita",
-      "name": "Escrita",
-      "color": "#6C5170"
+      "name": "DOC",
+      "color": "#2188e8"
     },
     {
       "id": "Revisão",
-      "name": "Revisão",
-      "color": "#54744F"
+      "name": "CONIC",
+      "color": "#2ed714"
     },
     {
       "id": "Banca",
-      "name": "Banca",
-      "color": "#B5893F"
+      "name": "COBRIC",
+      "color": "#fba209"
+    },
+    {
+      "id": "cat_mug29bz",
+      "name": "Projeto",
+      "color": "#e81717"
     }
   ],
-  "items": [],
-  "milestones": []
+  "items": [
+    {
+      "id": "iwa0a3yg",
+      "name": "Definição de regras, pontuações",
+      "start": "2026-08-16",
+      "end": "2026-08-22",
+      "category": "cat_mug29bz"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "mhd20bao",
+      "name": "Data limite CONIC",
+      "date": "2026-08-31",
+      "done": false
+    }
+  ]
 }
