@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "2027 Arena Fit",
+    "name": "NOME DO PROJETO AQUI",
     "start": "2026-02-02",
     "end": "2027-12-13",
     "contingency": "Validação física: fim de janeiro / início de fevereiro de 2027"
@@ -33,36 +33,5 @@
     }
   ],
   "items": [],
-  "milestones": [
-    {
-      "id": "m1",
-      "name": "Entrega do pré-projeto",
-      "date": "2026-03-15",
-      "done": true
-    },
-    {
-      "id": "m2",
-      "name": "Reunião de orientação (COBRIC)",
-      "date": "2026-05-10",
-      "done": true
-    },
-    {
-      "id": "m3",
-      "name": "Entrega parcial (qualificação)",
-      "date": "2026-08-07",
-      "done": false
-    },
-    {
-      "id": "m4",
-      "name": "Entrega da versão final",
-      "date": "2026-12-10",
-      "done": false
-    },
-    {
-      "id": "m5",
-      "name": "Defesa do TCC",
-      "date": "2026-12-18",
-      "done": false
-    }
-  ]
+  "milestones": []
 }
