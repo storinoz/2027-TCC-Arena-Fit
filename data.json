@@ -1,8 +1,8 @@
 {
   "project": {
-    "name": "TCC — Calculadora Acessível (modelo)",
-    "start": "2026-03-01",
-    "end": "2026-12-18",
+    "name": "2027 Arena Fit",
+    "start": "2026-02-02",
+    "end": "2027-12-13",
     "contingency": "Validação física: fim de janeiro / início de fevereiro de 2027"
   },
   "categories": [
@@ -32,57 +32,7 @@
       "color": "#B5893F"
     }
   ],
-  "items": [
-    {
-      "id": "i1",
-      "name": "Revisão bibliográfica",
-      "start": "2026-03-01",
-      "end": "2026-04-30",
-      "category": "Pesquisa"
-    },
-    {
-      "id": "i2",
-      "name": "Definição de requisitos",
-      "start": "2026-04-01",
-      "end": "2026-04-20",
-      "category": "Pesquisa"
-    },
-    {
-      "id": "i3",
-      "name": "Desenvolvimento do protótipo",
-      "start": "2026-04-21",
-      "end": "2026-07-15",
-      "category": "Desenvolvimento"
-    },
-    {
-      "id": "i4",
-      "name": "Testes de acessibilidade",
-      "start": "2026-07-16",
-      "end": "2026-08-10",
-      "category": "Desenvolvimento"
-    },
-    {
-      "id": "i5",
-      "name": "Escrita do TCC",
-      "start": "2026-06-01",
-      "end": "2026-11-15",
-      "category": "Escrita"
-    },
-    {
-      "id": "i6",
-      "name": "Revisão final do texto",
-      "start": "2026-11-16",
-      "end": "2026-12-05",
-      "category": "Revisão"
-    },
-    {
-      "id": "i7",
-      "name": "Preparação da defesa",
-      "start": "2026-12-01",
-      "end": "2026-12-17",
-      "category": "Banca"
-    }
-  ],
+  "items": [],
   "milestones": [
     {
       "id": "m1",
