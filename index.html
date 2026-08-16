@@ -17,6 +17,7 @@
 </script>
 <style>
   :root{
+    color-scheme: light;
     --bg:#F6F2E9;
     --paper-line:#E1D9C4;
     --panel:#FFFFFF;
@@ -44,6 +45,7 @@
     --radius: 10px;
   }
   html[data-theme="dark"]{
+    color-scheme: dark;
     --bg:#14161C;
     --paper-line:#22252E;
     --panel:#1B1E27;
@@ -119,7 +121,6 @@
     font-family:'IBM Plex Mono', monospace; font-size:13.5px; font-weight:600; color:var(--ink);
     background:transparent; border:1px solid transparent; border-radius:5px;
     padding:2px 5px; cursor:pointer; -webkit-appearance:none; appearance:none;
-    color-scheme:light dark;
   }
   .date-inline:hover{border-color:var(--rule); background:var(--input-bg);}
   .date-inline:focus{outline:none; border-color:var(--navy); background:var(--input-bg);}
@@ -379,7 +380,7 @@
         <div class="toolbar">
           <button class="primary" id="btnGhConnect">Salvar configuração</button>
           <button class="ghost" id="btnGhLoad">Carregar do GitHub</button>
-          <button class="ghost" id="btnGhSave">Forçar sincronização agora</button>
+          <button class="ghost" id="btnGhSave">Salvar no GitHub agora</button>
           <button class="ghost" id="btnGhForget">Esquecer token neste navegador</button>
         </div>
         <p class="sync-note">
@@ -390,9 +391,9 @@
           no armazenamento local deste navegador — nunca é enviado a nenhum lugar além da própria API do GitHub.
           Qualquer pessoa com esse token pode editar o repositório, então trate-o como uma senha e não o compartilhe
           publicamente.<br><br>
-          <b>Com o token preenchido, toda alteração é enviada ao GitHub automaticamente</b> (cerca de 1,5s depois
-          de você parar de editar, para agrupar cliques rápidos num só commit). O botão "Forçar sincronização
-          agora" só é necessário se algo falhar (ex: sem internet no momento) e você quiser tentar de novo na hora.
+          <b>A sincronização é manual</b> — nada é enviado ao GitHub sozinho. Depois de editar, clique em
+          "Salvar no GitHub agora". Se você tentar fechar ou sair da página com alterações ainda não enviadas,
+          o navegador mostra um aviso antes de deixar você sair.
         </p>
       </div>
     </div>
@@ -615,9 +616,15 @@
     }catch(e){}
     return seedData();
   }
-  function save(skipSync){
+  var hasUnsyncedChanges = false;
+  function save(fromRemote){
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
-    if(!skipSync) scheduleAutoSync();
+    if(fromRemote){
+      hasUnsyncedChanges = false; // this data just came FROM GitHub — nothing new to push
+    } else {
+      hasUnsyncedChanges = true;
+      if(ghConfigReady()) updateSyncStatus("Alterações não sincronizadas — clique em \"Salvar no GitHub agora\" ou feche a página com cuidado");
+    }
   }
   function uid(prefix){ return prefix + Math.random().toString(36).slice(2,9); }
 
@@ -1213,6 +1220,7 @@
   }
   function saveGhConfig(){ try{ localStorage.setItem(GH_KEY, JSON.stringify(ghConfig)); }catch(e){} }
   var ghConfig = loadGhConfig();
+  function ghConfigReady(){ return !!(ghConfig && ghConfig.owner && ghConfig.repo && ghConfig.token); }
 
   function fillGhForm(){
     document.getElementById("ghOwner").value = ghConfig.owner || "";
@@ -1300,14 +1308,17 @@
       });
   }
 
-  function saveToGithub(silent){
-    if(!ghConfig.owner || !ghConfig.repo){ if(!silent) alert("Preencha usuário e repositório primeiro."); return; }
-    if(!ghConfig.token){ if(!silent) alert("Cole um token de acesso pessoal com permissão de escrita para salvar no GitHub."); return; }
-    updateSyncStatus("Salvando no GitHub…");
+  function saveToGithub(silent, attempt, doneCb){
+    attempt = attempt || 0;
+    if(!ghConfig.owner || !ghConfig.repo){ if(!silent) alert("Preencha usuário e repositório primeiro."); if(doneCb) doneCb(); return; }
+    if(!ghConfig.token){ if(!silent) alert("Cole um token de acesso pessoal com permissão de escrita para salvar no GitHub."); if(doneCb) doneCb(); return; }
+    updateSyncStatus(attempt>0 ? "Resolvendo conflito, tentando novamente…" : "Salvando no GitHub…");
     var headers = { "Authorization": "token " + ghConfig.token };
     fetch(ghContentsUrl() + "?ref=" + encodeURIComponent(ghConfig.branch), { headers: headers })
       .then(function(r){ return r.status===404 ? null : r.json(); })
       .then(function(existing){
+        // always send the CURRENT local `data` — this is what the person actually wants saved,
+        // regardless of how many attempts it takes to get past a stale sha.
         var body = {
           message: "Atualiza cronograma — " + new Date().toISOString(),
           content: b64EncodeUnicode(JSON.stringify(data, null, 2)),
@@ -1326,34 +1337,62 @@
         return r.json();
       })
       .then(function(){
+        hasUnsyncedChanges = false;
         updateSyncStatus("Sincronizado com o GitHub às " + new Date().toLocaleTimeString());
+        if(doneCb) doneCb();
       })
       .catch(function(err){
         if(err && err.conflict){
-          updateSyncStatus("Conflito: alguém salvou uma versão mais nova — recarregando");
-          loadFromGithub(false);
+          // someone/something else wrote to the file between our GET and PUT (most often: our own
+          // previous sync still in flight). Never discard local edits by pulling the remote version —
+          // just fetch the new sha and retry sending the SAME local data.
+          if(attempt < 4){
+            saveToGithub(silent, attempt+1, doneCb);
+          } else {
+            updateSyncStatus("Conflito persistente ao sincronizar — tente 'Salvar no GitHub agora' de novo em instantes");
+            if(doneCb) doneCb();
+          }
         } else {
           updateSyncStatus("Falha ao sincronizar com o GitHub — última alteração ficou salva só neste navegador");
           console.error(err);
           if(!silent) alert("Falha ao salvar no GitHub: " + (err.message || "erro desconhecido"));
+          if(doneCb) doneCb();
         }
       });
   }
 
-  // ---------- automatic sync: every edit debounces into one background commit ----------
-  var autoSyncTimer = null;
-  function scheduleAutoSync(){
-    if(!ghConfig || !ghConfig.owner || !ghConfig.repo || !ghConfig.token) return; // nothing configured to write to
-    updateSyncStatus("Alterações pendentes — sincronizando em instantes…");
-    if(autoSyncTimer) clearTimeout(autoSyncTimer);
-    autoSyncTimer = setTimeout(function(){
-      autoSyncTimer = null;
-      saveToGithub(true); // silent: background saves shouldn't interrupt with alert popups
-    }, 1500);
+  // ---------- manual sync ----------
+  // sync only runs when the person clicks "Salvar no GitHub agora" — there is no automatic background
+  // sync. A queue/mutex still guards against overlapping requests if the button is clicked again while
+  // a sync is already in flight (e.g. double-click), so edits never race each other.
+  var syncInFlight = false;
+  var syncQueued = false;
+
+  function runQueuedSync(){
+    if(syncInFlight){ syncQueued = true; return; }
+    syncInFlight = true;
+    saveToGithub(false, 0, function(){
+      syncInFlight = false;
+      if(syncQueued){
+        syncQueued = false;
+        runQueuedSync();
+      }
+    });
   }
 
   document.getElementById("btnGhLoad").addEventListener("click", function(){ loadFromGithub(true); });
-  document.getElementById("btnGhSave").addEventListener("click", function(){ saveToGithub(false); });
+  document.getElementById("btnGhSave").addEventListener("click", function(){ runQueuedSync(); });
+
+  // ---------- warn before closing the page with unsynced changes ----------
+  // most browsers ignore any custom message and show their own generic "leave site?" text —
+  // that's a browser security restriction, not something this code controls.
+  window.addEventListener("beforeunload", function(e){
+    if(hasUnsyncedChanges && ghConfigReady()){
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    }
+  });
 
   // ---------- init ----------
   fillGhForm();
