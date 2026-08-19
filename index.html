@@ -363,10 +363,13 @@
       <span class="sync-status" id="syncStatus"><span class="pip"></span><span id="syncStatusText">Não configurado — dados salvos apenas neste navegador</span></span>
     </div>
     <div class="panel">
-      <div class="toolbar" style="margin-top:0;">
+      <div class="toolbar" id="syncTopBar" style="margin-top:0;">
         <button class="sync-toggle" id="syncToggle" style="align-self:center;">mostrar configuração</button>
-        <button class="ghost" id="btnSaveLocal">Salvar no navegador</button>
-        <button class="ghost" id="btnGhSave">Salvar no GitHub agora</button>
+        <span id="syncActionButtons" style="display:contents;">
+          <button class="ghost" id="btnGhLoad">Carregar do GitHub</button>
+          <button class="ghost" id="btnSaveLocal">Salvar no navegador</button>
+          <button class="ghost" id="btnGhSave">Salvar no GitHub agora</button>
+        </span>
       </div>
       <div id="syncConfigForm" style="display:none; margin-top:14px;">
         <div class="field-row">
@@ -381,9 +384,8 @@
           <label>Token de acesso pessoal (só para quem vai editar e salvar)</label>
           <input type="password" id="ghToken" placeholder="github_pat_xxxxxxxxxxxx">
         </div>
-        <div class="toolbar">
+        <div class="toolbar" id="syncBottomBar">
           <button class="primary" id="btnGhConnect">Salvar configuração</button>
-          <button class="ghost" id="btnGhLoad">Carregar do GitHub</button>
           <button class="ghost" id="btnGhForget">Esquecer token neste navegador</button>
         </div>
         <p class="sync-note">
@@ -398,6 +400,7 @@
           "Salvar no GitHub agora" (ou apenas "Salvar no navegador" se ainda não quiser publicar). Se você tentar
           fechar ou sair da página com alterações do GitHub ainda não enviadas, o navegador mostra um aviso antes
           de deixar você sair.
+
         </p>
       </div>
     </div>
@@ -518,6 +521,13 @@
     <div class="field">
       <label>Data</label>
       <input type="date" id="msDate">
+    </div>
+    <div class="field">
+      <label style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Categoria</span>
+        <button type="button" class="sync-toggle" id="btnManageCategoriesFromMs" style="font-size:11.5px;">gerenciar categorias</button>
+      </label>
+      <select id="msCategory"></select>
     </div>
     <div class="modal-actions">
       <button class="danger" id="msDelete" style="display:none;">Excluir</button>
@@ -858,9 +868,12 @@
     var totalM=data.milestones.length, doneM=data.milestones.filter(function(m){return m.done;}).length;
     document.getElementById("milestoneCount").textContent = doneM+" de "+totalM+" concluídos";
     var html = data.milestones.slice().sort(function(a,b){return a.date<b.date?-1:1;}).map(function(m){
+      var c = catById(m.category);
       return '<div class="milestone-row'+(m.done?' done':'')+'">'
         + '<span class="check'+(m.done?' done':'')+'" data-toggle-ms="'+m.id+'">'+(m.done?"✓":"")+'</span>'
+        + '<span class="swatch" style="background:'+c.color+'; width:10px; height:10px; border-radius:3px; flex-shrink:0;"></span>'
         + '<span class="name">'+esc(m.name)+'</span>'
+        + '<span class="cat">'+esc(c.name)+'</span>'
         + '<span class="date">'+fmt(m.date)+'</span>'
         + '<button class="ghost" data-edit-ms="'+m.id+'">Editar</button>'
       + '</div>';
@@ -993,8 +1006,9 @@
 
   // ---------- item modal ----------
   var itemOverlay = document.getElementById("itemOverlay");
-  function populateCategorySelect(){
-    var sel = document.getElementById("itemCategory");
+  function populateCategorySelect(selectId){
+    selectId = selectId || "itemCategory";
+    var sel = document.getElementById(selectId);
     var prevValue = sel.value;
     sel.innerHTML = data.categories.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name)+'</option>'; }).join("");
     if(prevValue) sel.value = prevValue;
@@ -1048,28 +1062,34 @@
   var msOverlay = document.getElementById("msOverlay");
   function openMsModal(id){
     var m = id ? data.milestones.find(function(x){return x.id===id;}) : null;
+    populateCategorySelect("msCategory");
     document.getElementById("msModalTitle").textContent = m ? "Editar marco" : "Adicionar marco";
     document.getElementById("msId").value = m ? m.id : "";
     document.getElementById("msName").value = m ? m.name : "";
     document.getElementById("msDate").value = m ? m.date : TODAY;
+    document.getElementById("msCategory").value = m ? m.category : (data.categories[0] ? data.categories[0].id : "");
     document.getElementById("msDelete").style.display = m ? "inline-block" : "none";
     msOverlay.classList.add("show");
     document.getElementById("msName").focus();
   }
   function closeMsModal(){ msOverlay.classList.remove("show"); }
-  document.getElementById("btnAddMilestone").addEventListener("click", function(){ openMsModal(null); });
+  document.getElementById("btnAddMilestone").addEventListener("click", function(){
+    if(!data.categories.length){ alert("Crie uma categoria primeiro (botão \"Gerenciar categorias\")."); return; }
+    openMsModal(null);
+  });
   document.getElementById("msCancel").addEventListener("click", closeMsModal);
   msOverlay.addEventListener("click", function(e){ if(e.target===msOverlay) closeMsModal(); });
   document.getElementById("msSave").addEventListener("click", function(){
     var name = document.getElementById("msName").value.trim();
     var d = document.getElementById("msDate").value;
+    var cat = document.getElementById("msCategory").value;
     if(!name || !d){ alert("Preencha nome e data."); return; }
     var id = document.getElementById("msId").value;
     if(id){
       var m = data.milestones.find(function(x){return x.id===id;});
-      m.name=name; m.date=d;
+      m.name=name; m.date=d; m.category=cat;
     } else {
-      data.milestones.push({id:uid("m"), name:name, date:d, done:false});
+      data.milestones.push({id:uid("m"), name:name, date:d, category:cat, done:false});
     }
     save(); renderAll(); closeMsModal();
   });
@@ -1086,11 +1106,13 @@
 
   function renderCatManagerList(){
     var html = data.categories.map(function(c){
-      var count = data.items.filter(function(it){ return it.category===c.id; }).length;
+      var itemCount = data.items.filter(function(it){ return it.category===c.id; }).length;
+      var msCount = data.milestones.filter(function(m){ return m.category===c.id; }).length;
+      var count = itemCount + msCount;
       return '<div class="cat-row">'
         + '<span class="swatch" style="background:'+c.color+'"></span>'
         + '<span class="name">'+esc(c.name)+'</span>'
-        + '<span class="usage">'+count+' item(ns)</span>'
+        + '<span class="usage">'+count+' uso(s)</span>'
         + '<button class="ghost" data-edit-cat="'+c.id+'">Editar</button>'
         + '<button class="ghost" data-remove-cat="'+c.id+'">Remover</button>'
       + '</div>';
@@ -1122,9 +1144,10 @@
     document.getElementById("catFormCancelEdit").style.display = "none";
   }
   function removeCategory(id){
-    var inUse = data.items.filter(function(it){return it.category===id;}).length;
-    if(inUse){
-      alert("Esta categoria está em uso em " + inUse + " item(ns). Troque a categoria desses itens antes de removê-la.");
+    var inUseItems = data.items.filter(function(it){return it.category===id;}).length;
+    var inUseMs = data.milestones.filter(function(m){return m.category===id;}).length;
+    if(inUseItems || inUseMs){
+      alert("Esta categoria está em uso em " + inUseItems + " fase(s)/tarefa(s) e " + inUseMs + " marco(s). Troque a categoria deles antes de removê-la.");
       return;
     }
     if(confirm("Remover esta categoria?")){
@@ -1143,11 +1166,16 @@
     catManagerOverlay.classList.remove("show");
     resetCatForm();
     renderAll();               // reflect renamed/recolored/removed categories everywhere
-    populateCategorySelect();  // refresh dropdown if the item modal is open behind it
+    populateCategorySelect("itemCategory"); // refresh dropdown if the item modal is open behind it
+    populateCategorySelect("msCategory");   // same for the milestone modal
   }
 
   document.getElementById("btnManageCategories").addEventListener("click", openCategoryManager);
   document.getElementById("btnManageCategoriesFromItem").addEventListener("click", function(e){
+    e.preventDefault();
+    openCategoryManager();
+  });
+  document.getElementById("btnManageCategoriesFromMs").addEventListener("click", function(e){
     e.preventDefault();
     openCategoryManager();
   });
@@ -1262,7 +1290,14 @@
     document.getElementById("ghToken").value = ghConfig.token || "";
     updateSyncStatus();
   }
+  function updateActionButtonsVisibility(){
+    // "Salvar no GitHub agora" must never appear until owner+repo+token are all in place —
+    // there's nothing useful it could do before that, and showing it invites a confusing error.
+    document.getElementById("btnGhSave").style.display = ghConfigReady() ? "inline-block" : "none";
+  }
+
   function updateSyncStatus(text){
+    updateActionButtonsVisibility();
     var wrap = document.getElementById("syncStatus");
     var txt = document.getElementById("syncStatusText");
     if(text){ txt.textContent = text; return; }
@@ -1282,9 +1317,20 @@
 
   document.getElementById("syncToggle").addEventListener("click", function(){
     var form = document.getElementById("syncConfigForm");
+    var actionButtons = document.getElementById("syncActionButtons");
+    var topBar = document.getElementById("syncTopBar");
+    var bottomBar = document.getElementById("syncBottomBar");
     var open = form.style.display !== "none";
     form.style.display = open ? "none" : "block";
     this.textContent = open ? "mostrar configuração" : "ocultar configuração";
+    if(open){
+      // collapsing — move the action buttons back up next to the toggle
+      topBar.appendChild(actionButtons);
+    } else {
+      // expanding — move the action buttons down, right after "Salvar configuração"
+      var forgetBtn = document.getElementById("btnGhForget");
+      bottomBar.insertBefore(actionButtons, forgetBtn);
+    }
   });
 
   document.getElementById("btnGhConnect").addEventListener("click", function(){
