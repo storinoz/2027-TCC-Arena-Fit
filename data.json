@@ -62,13 +62,15 @@
       "id": "mhd20bao",
       "name": "Data limite CONIC",
       "date": "2026-08-31",
-      "done": false
+      "done": false,
+      "category": "Revisão"
     },
     {
       "id": "mhr1gx6k",
       "name": "Resultado da pré seleção CONIC",
       "date": "2026-10-08",
-      "done": false
+      "done": false,
+      "category": "Revisão"
     }
   ]
 }
