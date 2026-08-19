@@ -215,9 +215,9 @@
   .gantt-milestones-row .lane{flex:1; position:relative; height:20px;}
   .diamond{
     position:absolute; width:12px; height:12px; transform:translate(-50%,-50%) rotate(45deg);
-    top:50%; border:2px solid var(--ink); background:var(--panel); cursor:pointer;
+    top:50%; border:2px solid var(--ink); cursor:pointer;
   }
-  .diamond.done{background:var(--sage); border-color:var(--sage);}
+  .diamond.done{border-color:var(--sage); box-shadow:0 0 0 3px var(--sage-soft);}
   .diamond:hover{filter:brightness(1.1);}
 
   .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; font-size:12px; color:var(--ink-soft);}
@@ -366,9 +366,9 @@
       <div class="toolbar" id="syncTopBar" style="margin-top:0;">
         <button class="sync-toggle" id="syncToggle" style="align-self:center;">mostrar configuração</button>
         <span id="syncActionButtons" style="display:contents;">
-          <button class="ghost" id="btnGhLoad">Carregar do GitHub</button>
           <button class="ghost" id="btnSaveLocal">Salvar no navegador</button>
-          <button class="ghost" id="btnGhSave">Salvar no GitHub agora</button>
+          <button class="ghost" id="btnGhSave">Salvar no GitHub</button>
+          <button class="ghost" id="btnGhLoad">Carregar do GitHub</button>
         </span>
       </div>
       <div id="syncConfigForm" style="display:none; margin-top:14px;">
@@ -397,7 +397,7 @@
           Qualquer pessoa com esse token pode editar o repositório, então trate-o como uma senha e não o compartilhe
           publicamente.<br><br>
           <b>A sincronização é manual</b> — nada é enviado ao GitHub sozinho. Depois de editar, clique em
-          "Salvar no GitHub agora" (ou apenas "Salvar no navegador" se ainda não quiser publicar). Se você tentar
+          "Salvar no GitHub" (ou apenas "Salvar no navegador" se ainda não quiser publicar). Se você tentar
           fechar ou sair da página com alterações do GitHub ainda não enviadas, o navegador mostra um aviso antes
           de deixar você sair.
 
@@ -426,6 +426,8 @@
           <input type="date" id="ganttViewEnd">
         </div>
         <button class="ghost" id="btnGanttViewReset">Ver período completo</button>
+        <button class="ghost" id="btnGantt6m">Próx. 6 meses</button>
+        <button class="ghost" id="btnGantt12m">Próx. 12 meses</button>
       </div>
       <div class="gantt-scroll">
         <div class="gantt" id="ganttChart"></div>
@@ -635,7 +637,7 @@
     } else {
       hasUnsyncedChanges = true;
       setDirtyFlag(true);
-      if(ghConfigReady()) updateSyncStatus("Alterações não sincronizadas — clique em \"Salvar no GitHub agora\" ou feche a página com cuidado");
+      if(ghConfigReady()) updateSyncStatus("Alterações não sincronizadas — clique em \"Salvar no GitHub\" ou feche a página com cuidado");
     }
   }
   function uid(prefix){ return prefix + Math.random().toString(36).slice(2,9); }
@@ -766,6 +768,24 @@
     f.e.value = data.project.end;
     renderGantt();
   });
+  function addMonthsISO(dateISO, months){
+    var d = parseD(dateISO);
+    var result = new Date(d.getFullYear(), d.getMonth()+months, d.getDate());
+    return isoOf(result);
+  }
+  function setGanttQuickRange(months){
+    var f = ganttInputs();
+    // start at today, but never before the project's own start
+    var start = TODAY < data.project.start ? data.project.start : TODAY;
+    var end = addMonthsISO(start, months);
+    if(end > data.project.end) end = data.project.end; // never past the project's own end date
+    if(start > data.project.end) start = data.project.end; // project already fully in the past
+    f.s.value = start;
+    f.e.value = end;
+    renderGantt();
+  }
+  document.getElementById("btnGantt6m").addEventListener("click", function(){ setGanttQuickRange(6); });
+  document.getElementById("btnGantt12m").addEventListener("click", function(){ setGanttQuickRange(12); });
 
   // ---------- render: gantt ----------
   function renderGantt(){
@@ -820,7 +840,8 @@
     var msHtml = visibleMs.map(function(m){
       var off = 100*daysBetween(start, parseD(m.date))/totalDays;
       off = Math.min(Math.max(off,0),100);
-      return '<div class="diamond'+(m.done?' done':'')+'" data-ms="'+m.id+'" style="left:'+off+'%" title="'+esc(m.name)+' · '+fmt(m.date)+'"></div>';
+      var mc = catById(m.category);
+      return '<div class="diamond'+(m.done?' done':'')+'" data-ms="'+m.id+'" style="left:'+off+'%;background:'+mc.color+'" title="'+esc(m.name)+' · '+esc(mc.name)+' · '+fmt(m.date)+(m.done?' · concluído':'')+'"></div>';
     }).join("");
 
     var html = '<div class="gantt-ruler">'+rulerHtml+'</div>'
@@ -1041,6 +1062,7 @@
     if(!name || !s || !e){ alert("Preencha nome, início e fim."); return; }
     if(e < s){ alert("A data de fim deve ser igual ou depois do início."); return; }
     var cat = document.getElementById("itemCategory").value;
+    if(!cat){ alert("Selecione uma categoria."); return; }
     var id = document.getElementById("itemId").value;
     if(id){
       var it = data.items.find(function(x){return x.id===id;});
@@ -1084,6 +1106,7 @@
     var d = document.getElementById("msDate").value;
     var cat = document.getElementById("msCategory").value;
     if(!name || !d){ alert("Preencha nome e data."); return; }
+    if(!cat){ alert("Selecione uma categoria."); return; }
     var id = document.getElementById("msId").value;
     if(id){
       var m = data.milestones.find(function(x){return x.id===id;});
@@ -1291,7 +1314,7 @@
     updateSyncStatus();
   }
   function updateActionButtonsVisibility(){
-    // "Salvar no GitHub agora" must never appear until owner+repo+token are all in place —
+    // "Salvar no GitHub" must never appear until owner+repo+token are all in place —
     // there's nothing useful it could do before that, and showing it invites a confusing error.
     document.getElementById("btnGhSave").style.display = ghConfigReady() ? "inline-block" : "none";
   }
@@ -1428,7 +1451,7 @@
           if(attempt < 4){
             saveToGithub(silent, attempt+1, doneCb);
           } else {
-            updateSyncStatus("Conflito persistente ao sincronizar — tente 'Salvar no GitHub agora' de novo em instantes");
+            updateSyncStatus("Conflito persistente ao sincronizar — tente 'Salvar no GitHub' de novo em instantes");
             if(doneCb) doneCb();
           }
         } else {
@@ -1441,7 +1464,7 @@
   }
 
   // ---------- manual sync ----------
-  // sync only runs when the person clicks "Salvar no GitHub agora" — there is no automatic background
+  // sync only runs when the person clicks "Salvar no GitHub" — there is no automatic background
   // sync. A queue/mutex still guards against overlapping requests if the button is clicked again while
   // a sync is already in flight (e.g. double-click), so edits never race each other.
   var syncInFlight = false;
@@ -1466,7 +1489,7 @@
     if(!ghConfigReady()){
       updateSyncStatus("Salvo neste navegador às " + new Date().toLocaleTimeString());
     }
-    alert("Salvo neste navegador." + (ghConfigReady() ? " Lembre-se de clicar em \"Salvar no GitHub agora\" para publicar." : ""));
+    alert("Salvo neste navegador." + (ghConfigReady() ? " Lembre-se de clicar em \"Salvar no GitHub\" para publicar." : ""));
   });
 
   // ---------- warn before closing the page with unsynced changes ----------
@@ -1487,7 +1510,7 @@
     if(hasUnsyncedChanges){
       // don't silently overwrite an unsynced local draft with the (older) remote version —
       // this was exactly the "it loads an old version when I make changes" symptom.
-      updateSyncStatus("Você tem alterações locais não sincronizadas de antes — clique em \"Salvar no GitHub agora\" para enviá-las, ou em \"Carregar do GitHub\" para descartá-las e puxar a versão mais recente");
+      updateSyncStatus("Você tem alterações locais não sincronizadas de antes — clique em \"Salvar no GitHub\" para enviá-las, ou em \"Carregar do GitHub\" para descartá-las e puxar a versão mais recente");
     } else {
       loadFromGithub(false);
     }
