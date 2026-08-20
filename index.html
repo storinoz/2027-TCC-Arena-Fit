@@ -217,7 +217,6 @@
     position:absolute; width:12px; height:12px; transform:translate(-50%,-50%) rotate(45deg);
     top:50%; border:2px solid var(--ink); cursor:pointer;
   }
-  .diamond.done{border-color:var(--sage); box-shadow:0 0 0 3px var(--sage-soft);}
   .diamond:hover{filter:brightness(1.1);}
 
   .legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; font-size:12px; color:var(--ink-soft);}
@@ -243,6 +242,7 @@
   }
   .item-row .swatch{width:10px; height:10px; border-radius:3px; flex-shrink:0;}
   .item-row .name{font-weight:500; flex:1; min-width:120px;}
+  .item-row.done .name{color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--ink-faint);}
   .item-row .dates{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); white-space:nowrap;}
   .item-row .cat{
     font-size:11px; font-family:'IBM Plex Mono', monospace; padding:2px 8px; border-radius:20px;
@@ -263,7 +263,6 @@
   }
   .check.done{background:var(--sage); border-color:var(--sage);}
   .milestone-row .name{flex:1; font-weight:500;}
-  .milestone-row.done .name{color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--ink-faint);}
   .milestone-row .date{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft);}
 
   /* weeks */
@@ -653,6 +652,22 @@
     var c = data.categories.find(function(x){ return x.id===id; });
     return c || {id:id, name:id || "Sem categoria", color:"#8A8477"};
   }
+  // returns a darker/more saturated shade of a hex color — used to mark a completed fase/tarefa
+  // while keeping it recognizably the same hue as its category.
+  function darkenColor(hex, amount){
+    amount = amount == null ? 0.32 : amount;
+    var h = hex.replace("#","");
+    if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+    r = Math.max(0, Math.round(r*(1-amount)));
+    g = Math.max(0, Math.round(g*(1-amount)));
+    b = Math.max(0, Math.round(b*(1-amount)));
+    return "#" + [r,g,b].map(function(v){ return v.toString(16).padStart(2,"0"); }).join("");
+  }
+  function itemColor(it){
+    var base = catById(it.category).color;
+    return it.done ? darkenColor(base) : base;
+  }
 
   // ---------- date helpers ----------
   function parseD(s){ var p=s.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
@@ -670,6 +685,7 @@
     if(t.textContent !== data.project.name) t.textContent = data.project.name;
     document.getElementById("rangeStartInput").value = data.project.start;
     document.getElementById("rangeEndInput").value = data.project.end;
+    document.title = data.project.name + " Cronograma";
   }
 
   // ---------- project date range editing ----------
@@ -704,9 +720,9 @@
 
   // ---------- render: stats ----------
   function renderStats(){
-    var totalM = data.milestones.length;
-    var doneM = data.milestones.filter(function(m){return m.done;}).length;
-    var pct = totalM ? Math.round(100*doneM/totalM) : 0;
+    var totalIt = data.items.length;
+    var doneIt = data.items.filter(function(it){return it.done;}).length;
+    var pct = totalIt ? Math.round(100*doneIt/totalIt) : 0;
 
     var start = parseD(data.project.start), end = parseD(data.project.end), now = parseD(TODAY);
     var totalDays = Math.max(1, daysBetween(start,end));
@@ -718,14 +734,14 @@
     }).length;
 
     var nextMs = data.milestones
-      .filter(function(m){return !m.done && m.date>=TODAY;})
+      .filter(function(m){return m.date>=TODAY;})
       .sort(function(a,b){return a.date<b.date?-1:1;})[0];
 
     var html = "";
-    html += stat("navy", pct+"%", "Marcos concluídos");
+    html += stat("navy", pct+"%", "Fases/tarefas concluídas");
     html += stat("amber", remaining, "Dias até o encerramento");
     html += stat("sage", activeToday, "Fases/tarefas em andamento hoje");
-    html += stat("", nextMs? fmt(nextMs.date): "—", nextMs? ("Próximo marco: "+nextMs.name) : "Nenhum marco pendente");
+    html += stat("", nextMs? fmt(nextMs.date): "—", nextMs? ("Próximo marco: "+nextMs.name) : "Nenhum marco cadastrado");
     document.getElementById("statRow").innerHTML = html;
   }
   function stat(cls, num, lbl){
@@ -809,7 +825,7 @@
     // rows — only items that intersect the chosen view range are shown, clamped to its edges
     var visibleItems = data.items.filter(function(it){ return it.end>=view.start && it.start<=view.end; });
     var rowsHtml = visibleItems.map(function(it){
-      var color = catById(it.category).color;
+      var color = itemColor(it);
       var clampedStart = it.start<view.start ? view.start : it.start;
       var clampedEnd = it.end>view.end ? view.end : it.end;
       var s = parseD(clampedStart), e = parseD(clampedEnd);
@@ -823,7 +839,7 @@
       return '<div class="gantt-row">'
         + '<div class="gantt-label" data-item="'+it.id+'"><span class="swatch" style="background:'+color+'"></span><span title="'+esc(it.name)+'">'+esc(it.name)+'</span></div>'
         + '<div class="gantt-track">'
-          + '<div class="gantt-bar" data-item="'+it.id+'" style="left:'+left+'%;width:'+width+'%;background:'+color+'" title="'+esc(it.name)+' · '+fmt(it.start)+' – '+fmt(it.end)+'"></div>'
+          + '<div class="gantt-bar" data-item="'+it.id+'" style="left:'+left+'%;width:'+width+'%;background:'+color+'" title="'+esc(it.name)+' · '+fmt(it.start)+' – '+fmt(it.end)+(it.done?' · concluída':'')+'"></div>'
           + todayMark
         + '</div>'
       + '</div>';
@@ -841,7 +857,7 @@
       var off = 100*daysBetween(start, parseD(m.date))/totalDays;
       off = Math.min(Math.max(off,0),100);
       var mc = catById(m.category);
-      return '<div class="diamond'+(m.done?' done':'')+'" data-ms="'+m.id+'" style="left:'+off+'%;background:'+mc.color+'" title="'+esc(m.name)+' · '+esc(mc.name)+' · '+fmt(m.date)+(m.done?' · concluído':'')+'"></div>';
+      return '<div class="diamond" data-ms="'+m.id+'" style="left:'+off+'%;background:'+mc.color+'" title="'+esc(m.name)+' · '+esc(mc.name)+' · '+fmt(m.date)+'"></div>';
     }).join("");
 
     var html = '<div class="gantt-ruler">'+rulerHtml+'</div>'
@@ -870,8 +886,10 @@
     document.getElementById("itemCount").textContent = data.items.length + " item(ns)";
     var html = data.items.slice().sort(function(a,b){return a.start<b.start?-1:1;}).map(function(it){
       var c = catById(it.category);
-      return '<div class="item-row">'
-        + '<span class="swatch" style="background:'+c.color+'"></span>'
+      var color = itemColor(it);
+      return '<div class="item-row'+(it.done?' done':'')+'">'
+        + '<span class="check'+(it.done?' done':'')+'" data-toggle-item="'+it.id+'">'+(it.done?"✓":"")+'</span>'
+        + '<span class="swatch" style="background:'+color+'"></span>'
         + '<span class="name">'+esc(it.name)+'</span>'
         + '<span class="cat">'+esc(c.name)+'</span>'
         + '<span class="dates">'+fmt(it.start)+' – '+fmt(it.end)+'</span>'
@@ -879,6 +897,14 @@
       + '</div>';
     }).join("") || '<p style="color:var(--ink-faint);font-style:italic;">Nenhuma fase ou tarefa ainda.</p>';
     document.getElementById("itemList").innerHTML = html;
+    document.querySelectorAll('[data-toggle-item]').forEach(function(el){
+      el.addEventListener("click", function(){
+        var id = el.getAttribute("data-toggle-item");
+        var it = data.items.find(function(x){return x.id===id;});
+        it.done = !it.done;
+        save(); renderAll();
+      });
+    });
     document.querySelectorAll('[data-edit-item]').forEach(function(el){
       el.addEventListener("click", function(){ openItemModal(el.getAttribute("data-edit-item")); });
     });
@@ -886,12 +912,10 @@
 
   // ---------- render: milestones ----------
   function renderMilestoneList(){
-    var totalM=data.milestones.length, doneM=data.milestones.filter(function(m){return m.done;}).length;
-    document.getElementById("milestoneCount").textContent = doneM+" de "+totalM+" concluídos";
+    document.getElementById("milestoneCount").textContent = data.milestones.length + " marco(s)";
     var html = data.milestones.slice().sort(function(a,b){return a.date<b.date?-1:1;}).map(function(m){
       var c = catById(m.category);
-      return '<div class="milestone-row'+(m.done?' done':'')+'">'
-        + '<span class="check'+(m.done?' done':'')+'" data-toggle-ms="'+m.id+'">'+(m.done?"✓":"")+'</span>'
+      return '<div class="milestone-row">'
         + '<span class="swatch" style="background:'+c.color+'; width:10px; height:10px; border-radius:3px; flex-shrink:0;"></span>'
         + '<span class="name">'+esc(m.name)+'</span>'
         + '<span class="cat">'+esc(c.name)+'</span>'
@@ -900,14 +924,6 @@
       + '</div>';
     }).join("") || '<p style="color:var(--ink-faint);font-style:italic;">Nenhum marco ainda.</p>';
     document.getElementById("milestoneList").innerHTML = html;
-    document.querySelectorAll('[data-toggle-ms]').forEach(function(el){
-      el.addEventListener("click", function(){
-        var id = el.getAttribute("data-toggle-ms");
-        var m = data.milestones.find(function(x){return x.id===id;});
-        m.done = !m.done;
-        save(); renderAll();
-      });
-    });
     document.querySelectorAll('[data-edit-ms]').forEach(function(el){
       el.addEventListener("click", function(){ openMsModal(el.getAttribute("data-edit-ms")); });
     });
@@ -971,7 +987,7 @@
         body += "<ul>" + items.map(function(it){ return "<li>"+esc(it.name)+" <span style='color:var(--ink-faint)'>("+fmt(it.start)+"–"+fmt(it.end)+")</span></li>"; }).join("") + "</ul>";
       }
       if(mss.length){
-        body += "<ul>" + mss.map(function(m){ return "<li>◆ "+esc(m.name)+" — "+fmt(m.date)+(m.done?" ✓":"")+"</li>"; }).join("") + "</ul>";
+        body += "<ul>" + mss.map(function(m){ return "<li>◆ "+esc(m.name)+" — "+fmt(m.date)+"</li>"; }).join("") + "</ul>";
       }
       if(!items.length && !mss.length){
         body = '<p class="empty">Sem itens nesta semana.</p>';
@@ -1068,7 +1084,7 @@
       var it = data.items.find(function(x){return x.id===id;});
       it.name=name; it.start=s; it.end=e; it.category=cat;
     } else {
-      data.items.push({id:uid("i"), name:name, start:s, end:e, category:cat});
+      data.items.push({id:uid("i"), name:name, start:s, end:e, category:cat, done:false});
     }
     save(); renderAll(); closeItemModal();
   });
@@ -1112,7 +1128,7 @@
       var m = data.milestones.find(function(x){return x.id===id;});
       m.name=name; m.date=d; m.category=cat;
     } else {
-      data.milestones.push({id:uid("m"), name:name, date:d, category:cat, done:false});
+      data.milestones.push({id:uid("m"), name:name, date:d, category:cat});
     }
     save(); renderAll(); closeMsModal();
   });
@@ -1233,7 +1249,7 @@
   // ---------- title edit ----------
   document.getElementById("projTitle").addEventListener("blur", function(){
     var v = this.textContent.trim();
-    if(v){ data.project.name = v; save(); }
+    if(v){ data.project.name = v; save(); document.title = v + " Cronograma"; }
     else{ this.textContent = data.project.name; }
   });
   document.getElementById("projTitle").addEventListener("keydown", function(e){
