@@ -33,7 +33,8 @@
       "name": "Definição de regras do app",
       "start": "2026-08-16",
       "end": "2026-08-22",
-      "category": "cat_mug29bz"
+      "category": "cat_mug29bz",
+      "done": false
     },
     {
       "id": "im9aa40t",
@@ -54,14 +55,16 @@
       "name": "Doc CONIC",
       "start": "2026-08-19",
       "end": "2026-08-23",
-      "category": "Revisão"
+      "category": "Revisão",
+      "done": false
     },
     {
       "id": "inin6j2e",
       "name": "DOC (até Materiais e Métodos)",
       "start": "2026-08-16",
       "end": "2026-09-12",
-      "category": "Escrita"
+      "category": "Escrita",
+      "done": false
     }
   ],
   "milestones": [
